@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { getMeta, setMeta, deleteBlobs, blobIdsOf, getBlob, saveBlob, uid, clearBlobs } from './lib/db.js';
 import { DEFAULT_FOLDERS } from './lib/categories.js';
+import { useSecurity } from './security.jsx';
 
 const StoreCtx = createContext(null);
 export const TRASH_DAYS = 30; // материалы в корзине удаляются автоматически через 30 дней
@@ -49,19 +50,46 @@ function seed() {
 export function StoreProvider({ children }) {
   const [state, setState] = useReducer((s, fn) => fn(s), EMPTY);
   const [ready, setReady] = useState(false);
+  const [loadError, setLoadError] = useState(false);
   const saveTimer = useRef();
+  const sec = useSecurity();
+  const stateRef = useRef(state);
+  stateRef.current = state;
+  const readyRef = useRef(false);
+  readyRef.current = ready;
 
+  // Данные читаются только после разблокировки; при блокировке убираются из памяти.
   useEffect(() => {
+    if (sec.locked) {
+      clearTimeout(saveTimer.current);
+      setReady(false);
+      setState(() => EMPTY);
+      return undefined;
+    }
+    let alive = true;
     getMeta('state')
       .then((saved) => {
+        if (!alive) return;
         setState(() => saved || seed());
+        setLoadError(false);
         setReady(true);
       })
       .catch(() => {
+        if (!alive) return;
+        // Зашифрованные данные не перезаписываем пустым архивом.
+        if (sec.sec.lockEnabled) { setLoadError(true); return; }
         setState(() => seed());
         setReady(true);
       });
-  }, []);
+    return () => { alive = false; };
+  }, [sec.locked]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Перед блокировкой и перешифрованием — немедленно сохранить несохранённое.
+  useEffect(() => sec.registerFlush(async () => {
+    if (!readyRef.current) return;
+    clearTimeout(saveTimer.current);
+    await setMeta('state', stateRef.current);
+  }), []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Автоудаление из корзины: при запуске и раз в час.
   useEffect(() => {
@@ -82,10 +110,10 @@ export function StoreProvider({ children }) {
   }, [ready]);
 
   useEffect(() => {
-    if (!ready) return;
+    if (!ready || sec.locked) return;
     clearTimeout(saveTimer.current);
-    saveTimer.current = setTimeout(() => setMeta('state', state), 250);
-  }, [state, ready]);
+    saveTimer.current = setTimeout(() => setMeta('state', state).catch(() => {}), 250);
+  }, [state, ready]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const mapItems = useCallback((ids, fn) => {
     const set = new Set(ids);
@@ -99,6 +127,7 @@ export function StoreProvider({ children }) {
 
     return {
       ready,
+      loadError,
       state,
       folders: state.folders,
       items: state.items,
@@ -229,7 +258,7 @@ export function StoreProvider({ children }) {
         });
       },
     };
-  }, [state, ready, mapItems]);
+  }, [state, ready, loadError, mapItems]);
 
   return <StoreCtx.Provider value={api}>{children}</StoreCtx.Provider>;
 }

@@ -4,7 +4,9 @@ import { TopBar, Toggle } from '../components/Common.jsx';
 import { FolderRow } from './Folders.jsx';
 import { useStore } from '../store.jsx';
 import { useNav, useUi } from '../ui.jsx';
-import { useSecurity } from '../security.jsx';
+import { useSecurity, AUTOLOCK } from '../security.jsx';
+import { biometricAvailable } from '../lib/vault.js';
+import { markExternal } from '../lib/external.js';
 import { usePrefs, ACCENTS } from '../prefs.jsx';
 import { haptic } from '../lib/haptics.js';
 import { createBackup, readBackup, restoreBackup } from '../lib/backup.js';
@@ -45,6 +47,22 @@ export default function Settings() {
   const hiddenCount = store.folders.filter((f) => f.hidden).length;
   const prefs = usePrefs();
 
+  const toggleBio = async () => {
+    if (sec.sec.bio) { await sec.disableBio(); ui.showToast('Вход по биометрии выключен'); return; }
+    const av = await biometricAvailable();
+    if (!av) { ui.showToast('Биометрия на этом устройстве недоступна', null, 4500); return; }
+    try {
+      await sec.enableBio();
+      haptic('success');
+      ui.showToast('Вход по биометрии включён');
+    } catch (e) {
+      haptic('error');
+      ui.showToast(e?.code === 'noprf'
+        ? 'В браузере вход по биометрии здесь недоступен — он будет работать в установленном приложении'
+        : 'Биометрия не подтверждена', null, 5000);
+    }
+  };
+
   return (
     <div className="screen with-nav">
       <TopBar title="Настройки" back={false} />
@@ -62,8 +80,42 @@ export default function Settings() {
           label="Сменить код доступа"
           onClick={() => (sec.sec.lockEnabled ? nav.push({ name: 'pin', mode: 'change' }) : nav.push({ name: 'pin', mode: 'setup' }))}
         />
+        {sec.sec.lockEnabled && (
+          <>
+            <button className="set-row" onClick={toggleBio} role="switch" aria-checked={!!sec.sec.bio}>
+              <span className="set-icon"><Icon name="faceId" size={20} /></span>
+              <span className="set-label">Вход по Face ID или отпечатку</span>
+              <Toggle on={!!sec.sec.bio} />
+            </button>
+            <Row
+              icon="history"
+              label="Автоблокировка"
+              value={AUTOLOCK.find((x) => x.s === (sec.sec.autoLock ?? 0))?.label}
+              onClick={() => ui.open({
+                type: 'menu',
+                title: 'Блокировать архив',
+                actions: AUTOLOCK.map((x) => ({
+                  icon: x.s === (sec.sec.autoLock ?? 0) ? 'check' : 'history',
+                  label: x.s === 0 ? 'Сразу при сворачивании' : `${x.label} без действий`,
+                  run: () => sec.setAutoLock(x.s),
+                })),
+              })}
+            />
+          </>
+        )}
+        <button className="set-row" onClick={() => sec.setPrivacyOn(sec.sec.privacy === false)} role="switch" aria-checked={sec.sec.privacy !== false}>
+          <span className="set-icon"><Icon name="eyeOff" size={20} /></span>
+          <span className="set-label">Скрывать при сворачивании</span>
+          <Toggle on={sec.sec.privacy !== false} />
+        </button>
+        <Row icon="key" label="Неверные попытки входа" value={sec.attempts.list.length || null} onClick={() => ui.open({ type: 'attempts' })} />
         <Row icon="hidden" label="Скрытые папки" value={hiddenCount || null} onClick={() => nav.push({ name: 'hidden' })} />
       </div>
+      <p className="hint set-note">
+        {sec.encrypted
+          ? 'Материалы зашифрованы на устройстве (AES-256). Ключ открывается только кодом доступа или биометрией.'
+          : 'Включите блокировку — материалы будут зашифрованы на устройстве ключом из кода доступа.'}
+      </p>
 
       <h4 className="set-group">Хранилище</h4>
       <div className="set-card">
@@ -182,6 +234,7 @@ export function Backup() {
   const store = useStore();
   const ui = useUi();
   const prefs = usePrefs();
+  const sec = useSecurity();
   const every = prefs.backupEvery ?? 14;
   const [busy, setBusy] = useState('');
   const input = useRef();
@@ -191,6 +244,7 @@ export function Backup() {
     try {
       const { blob, name } = await createBackup(store.state);
       const file = new File([blob], name, { type: 'application/octet-stream' });
+      markExternal();
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         await navigator.share({ files: [file], title: name }).catch(() => {});
       } else {
@@ -239,6 +293,9 @@ export function Backup() {
         Материалы хранятся только на этом устройстве. Создайте файл резервной копии и сохраните его в надёжное место —
         он понадобится, если телефон будет заменён или данные приложения очистятся.
       </p>
+      {sec.encrypted && (
+        <p className="hint warn-hint">Файл резервной копии не зашифрован. Храните его в надёжном месте; для зашифрованного переноса используйте «Экспорт папок».</p>
+      )}
       <div className="set-card">
         <Row icon="download" label="Создать резервную копию" onClick={busy ? undefined : make} />
         <Row icon="upload" label="Восстановить из копии" onClick={busy ? undefined : () => input.current.click()} />

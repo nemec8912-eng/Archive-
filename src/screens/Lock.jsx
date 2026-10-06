@@ -7,7 +7,30 @@ import { haptic } from '../lib/haptics.js';
 
 const LEN = 4;
 
-export function PinPad({ title, sub, error, onComplete, resetKey }) {
+// Перешифрование архива: экран с ходом работы, приложение в это время недоступно.
+export function BusyOverlay({ busy }) {
+  const pct = busy.total ? Math.round((busy.done / busy.total) * 100) : 0;
+  return (
+    <div className="busy-overlay" role="alertdialog" aria-live="polite">
+      <span className="pin-lock"><Icon name="lock" size={26} /></span>
+      <h2>{busy.text}</h2>
+      <div className="storage-bar"><i style={{ width: `${pct}%` }} /></div>
+      <p className="muted">{busy.total > 1 ? `${busy.done} из ${busy.total}` : ' '} Не закрывайте приложение.</p>
+    </div>
+  );
+}
+
+// Обложка вместо содержимого, пока приложение свёрнуто (в переключателе приложений).
+export function PrivacyCover() {
+  return (
+    <div className="privacy-cover" aria-hidden="true">
+      <span className="pin-lock"><Icon name="lock" size={30} /></span>
+      <div className="lock-brand">Архив</div>
+    </div>
+  );
+}
+
+export function PinPad({ title, sub, error, onComplete, resetKey, extraKey }) {
   const [pin, setPin] = useState('');
   useEffect(() => { setPin(''); }, [resetKey]);
   useEffect(() => { if (error) haptic('error'); }, [error, resetKey]);
@@ -32,7 +55,7 @@ export function PinPad({ title, sub, error, onComplete, resetKey }) {
         {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((d) => (
           <button key={d} className="key" onClick={() => press(d)}>{d}</button>
         ))}
-        <span />
+        {extraKey || <span />}
         <button className="key" onClick={() => press('0')}>0</button>
         <button className="key ghost" onClick={() => setPin((p) => p.slice(0, -1))} aria-label="Стереть"><Icon name="backspace" size={24} /></button>
       </div>
@@ -40,21 +63,48 @@ export function PinPad({ title, sub, error, onComplete, resetKey }) {
   );
 }
 
-// Экран блокировки — закрывает всё содержимое, пока не введён код.
+// Экран блокировки — закрывает всё содержимое, пока не введён код или не пройдена биометрия.
 export function LockScreen() {
   const sec = useSecurity();
+  const ui = useUi();
   const [error, setError] = useState('');
   const [attempt, setAttempt] = useState(0);
+  const [checking, setChecking] = useState(false);
+  const bio = sec.sec.bio;
+
+  const afterUnlock = () => {
+    const fresh = sec.attempts.list.filter((a) => a.at > (sec.attempts.seenAt || 0));
+    if (fresh.length) {
+      setTimeout(() => ui.showToast(`С прошлого входа неверных попыток: ${fresh.length}`, { label: 'Журнал', run: () => ui.open({ type: 'attempts' }) }, 6000), 400);
+    }
+  };
+
+  const tryBio = async () => {
+    setError('');
+    const ok = await sec.unlockBio();
+    if (ok) { haptic('success'); afterUnlock(); } else setError('Не удалось подтвердить. Введите код.');
+  };
+
+  // В установленном приложении биометрия запрашивается сразу; в браузере — по кнопке.
+  useEffect(() => {
+    if (bio && window.Capacitor?.isNativePlatform?.()) tryBio();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   return (
     <div className="lock-screen">
       <div className="lock-brand">Архив</div>
       <PinPad
-        title="Введите код"
+        title={checking ? 'Проверка…' : 'Введите код'}
         error={error}
         resetKey={attempt}
+        extraKey={bio ? (
+          <button className="key ghost" onClick={tryBio} aria-label="Войти по Face ID или отпечатку"><Icon name="faceId" size={30} /></button>
+        ) : null}
         onComplete={async (pin) => {
+          setChecking(true);
           const ok = await sec.unlock(pin);
-          if (!ok) { setError('Неверный код'); setAttempt((a) => a + 1); }
+          setChecking(false);
+          if (!ok) { setError('Неверный код'); setAttempt((a) => a + 1); } else afterUnlock();
         }}
       />
     </div>
@@ -80,8 +130,8 @@ export function PinScreen({ route }) {
     if (step === 'old') {
       if (!(await sec.verify(pin))) return reset('Неверный код');
       if (mode === 'disable') {
-        sec.disableLock();
-        ui.showToast('Блокировка выключена');
+        await sec.disableLock();
+        ui.showToast('Блокировка выключена, шифрование снято');
         nav.back();
         return;
       }
@@ -91,7 +141,8 @@ export function PinScreen({ route }) {
     } else {
       if (pin !== first) { setStep('new'); setFirst(''); return reset('Коды не совпали, попробуйте снова'); }
       await sec.setPin(pin);
-      ui.showToast(mode === 'setup' ? 'Блокировка включена' : 'Код изменён');
+      haptic('success');
+      ui.showToast(mode === 'setup' ? 'Блокировка включена, архив зашифрован' : 'Код изменён');
       nav.back();
     }
   };

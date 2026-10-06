@@ -1,5 +1,6 @@
 import { saveBlob, getBlob, uid } from './db.js';
 import { stamp } from './format.js';
+import { markExternal } from './external.js';
 
 const THUMB_MAX = 480;
 
@@ -184,6 +185,7 @@ export function chatToText(item) {
 
 // Поделиться: системное меню телефона, иначе — сохранить файл.
 export async function shareItem(item) {
+  markExternal();
   try {
     if (item.type === 'note' || item.type === 'chat') {
       const text = item.type === 'note' ? item.text || '' : chatToText(item);
@@ -252,6 +254,7 @@ export async function saveToGallery(items) {
     if (blob) files.push(new File([blob], it.name, { type: it.mime || blob.type }));
   }
   if (!files.length) return 0;
+  markExternal();
   const native = window.Capacitor?.isNativePlatform?.() && window.ArchiveNative?.saveToGallery;
   if (native) return window.ArchiveNative.saveToGallery(files);
   try {
@@ -269,6 +272,7 @@ export async function saveToGallery(items) {
 // Отдать файл пользователю: системное меню «Поделиться» (сохранить в Файлы, отправить себе) или скачивание.
 export async function offerFile(blob, name) {
   const file = new File([blob], name, { type: blob.type || 'application/octet-stream' });
+  markExternal();
   const native = window.Capacitor?.isNativePlatform?.() && window.ArchiveNative?.offerFile;
   if (native) return window.ArchiveNative.offerFile(file);
   if (navigator.canShare && navigator.canShare({ files: [file] })) {

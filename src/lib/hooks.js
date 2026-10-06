@@ -3,6 +3,14 @@ import { getBlob } from './db.js';
 import { haptic } from './haptics.js';
 
 const thumbCache = new Map();
+let generation = 0;
+
+// При блокировке временные ссылки на расшифрованные миниатюры уничтожаются.
+export function clearThumbCache() {
+  thumbCache.forEach((u) => URL.revokeObjectURL(u));
+  thumbCache.clear();
+  generation += 1;
+}
 
 // Возвращает временную ссылку на файл из хранилища устройства.
 export function useBlobUrl(id, { cache = false, enabled = true } = {}) {
@@ -12,12 +20,13 @@ export function useBlobUrl(id, { cache = false, enabled = true } = {}) {
     if (cache && thumbCache.has(id)) { setUrl(thumbCache.get(id)); return undefined; }
     let alive = true;
     let made;
+    const gen = generation;
     getBlob(id).then((b) => {
-      if (!b || !alive) return;
+      if (!b || !alive || gen !== generation) return;
       made = URL.createObjectURL(b);
       if (cache) thumbCache.set(id, made);
       setUrl(made);
-    });
+    }).catch(() => {});
     return () => {
       alive = false;
       if (made && !cache) URL.revokeObjectURL(made);

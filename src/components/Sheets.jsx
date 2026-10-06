@@ -5,10 +5,12 @@ import { Thumb, TypeIcon } from './Common.jsx';
 import { useUi, useNav } from '../ui.jsx';
 import { useStore } from '../store.jsx';
 import { usePrefs } from '../prefs.jsx';
+import { useSecurity } from '../security.jsx';
 import { haptic } from '../lib/haptics.js';
 import { importFile, audioExt, audioInfo, imageInfo } from '../lib/media.js';
 import { parseChatFile, buildChatItem } from '../lib/chatImport.js';
 import { freeSpace } from './Housekeeping.jsx';
+import { markExternal } from '../lib/external.js';
 import { saveBlob, uid } from '../lib/db.js';
 import { fmtDur, fmtSize, fmtDate, filesWord, stamp } from '../lib/format.js';
 
@@ -59,6 +61,7 @@ export function Recorder({ onDone, onCancel }) {
   const start = async () => {
     setError('');
     try {
+      markExternal();
       stream.current = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mime = ['audio/mp4', 'audio/webm;codecs=opus', 'audio/webm', 'audio/ogg']
         .find((m) => window.MediaRecorder?.isTypeSupported?.(m));
@@ -210,6 +213,35 @@ function TypeConfirm({ title, text, word, okText = 'Подтвердить', onO
         </div>
       </form>
     </div>
+  );
+}
+
+// Журнал неверных попыток входа.
+function Attempts({ onClose }) {
+  const sec = useSecurity();
+  const list = sec.attempts.list;
+  useEffect(() => { sec.markAttemptsSeen(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  return (
+    <Sheet title="Неверные попытки входа" onClose={onClose}>
+      {list.length ? (
+        <div className="menu-list scroll">
+          {list.map((a, i) => (
+            <div key={i} className="menu-item static">
+              <span className="mi-icon"><Icon name={a.method === 'biometric' ? 'faceId' : 'key'} size={20} /></span>
+              <span className="mi-label">{a.method === 'biometric' ? 'Биометрия не подтверждена' : 'Неверный код'}</span>
+              <span className="mi-value">{fmtDate(a.at)}</span>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="hint center-text">Неверных попыток не было.</p>
+      )}
+      {list.length > 0 && (
+        <button className="btn ghost help-tips" onClick={() => { sec.clearAttempts(); onClose(); }}>
+          <Icon name="trash" size={18} />Очистить журнал
+        </button>
+      )}
+    </Sheet>
   );
 }
 
@@ -432,6 +464,8 @@ export function SheetHost() {
     content = <FolderPicker title={s.title} onPick={s.onPick} onClose={close} />;
   } else if (s?.type === 'confirm') {
     content = <Confirm {...s} onClose={close} />;
+  } else if (s?.type === 'attempts') {
+    content = <Attempts onClose={close} />;
   } else if (s?.type === 'typeConfirm') {
     content = <TypeConfirm {...s} onClose={close} />;
   } else if (s?.type === 'prompt') {

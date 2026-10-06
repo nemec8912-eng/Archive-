@@ -17,7 +17,7 @@ import NoteEditor from './screens/NoteEditor.jsx';
 import Search from './screens/Search.jsx';
 import Trash from './screens/Trash.jsx';
 import Settings, { HiddenFolders, Backup } from './screens/Settings.jsx';
-import { LockScreen, PinScreen } from './screens/Lock.jsx';
+import { LockScreen, PinScreen, BusyOverlay, PrivacyCover } from './screens/Lock.jsx';
 import Editor from './screens/Editor.jsx';
 import Duplicates from './screens/Duplicates.jsx';
 import StorageScreen from './screens/Storage.jsx';
@@ -59,8 +59,18 @@ function Shell() {
   const sec = useSecurity();
   useEdgeSwipe(!sec.locked && store.ready && nav.canGoBack && nav.top.name !== 'viewer', nav.requestBack);
 
+  // Пока идёт перешифрование — только экран хода работы.
+  if (sec.busy) return <BusyOverlay busy={sec.busy} />;
   // Пока архив заблокирован, содержимое вообще не отрисовывается.
-  if (sec.locked) return <LockScreen />;
+  if (sec.locked) return <>{sec.privacy && <PrivacyCover />}<LockScreen /></>;
+  if (store.loadError) {
+    return (
+      <div className="lock-screen">
+        <h2>Не удалось открыть архив</h2>
+        <p className="muted center-text">Данные на устройстве не расшифровались. Перезапустите приложение; если не поможет — восстановите резервную копию.</p>
+      </div>
+    );
+  }
   if (!store.ready) return <div className="app"><div className="boot" /></div>;
 
   const route = nav.top;
@@ -73,6 +83,7 @@ function Shell() {
       <Toast />
       <Onboarding />
       <Housekeeping />
+      {sec.privacy && <PrivacyCover />}
     </div>
   );
 }

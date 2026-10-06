@@ -65,6 +65,9 @@ const P = {
   bell: <><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15z" /><path d="M10 20.5a2 2 0 0 0 4 0" /></>,
   reset: <><path d="M4 12a8 8 0 1 0 2.3-5.6M4 4.5V9h4.5" /><path d="M12 8.5v4l2.5 1.5" /></>,
   fileLock: <><path d="M14 3H6.5A1.5 1.5 0 0 0 5 4.5v15A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5V8z" /><path d="M14 3v5h5" /><rect x="9" y="13" width="6" height="4.5" rx="1" /><path d="M10.2 13v-1.3a1.8 1.8 0 0 1 3.6 0V13" /></>,
+  faceId: <><path d="M4 8.5V6a2 2 0 0 1 2-2h2.5M15.5 4H18a2 2 0 0 1 2 2v2.5M20 15.5V18a2 2 0 0 1-2 2h-2.5M8.5 20H6a2 2 0 0 1-2-2v-2.5" /><path d="M9 9.5v1M15 9.5v1M12 9.5v3.5h-1M9.5 16a4 4 0 0 0 5 0" /></>,
+  history: <><circle cx="12" cy="12" r="8.5" /><path d="M12 7.5V12l3 2" /></>,
+  key: <><circle cx="8" cy="15" r="4" /><path d="m11 12 8.5-8.5M16.5 6.5l2.5 2.5M14.5 8.5l2 2" /></>,
   rew: <><path d="M4 12a8 8 0 1 0 2.4-5.7M4 4.5v4h4" /><text x="12.4" y="15.2" fontSize="7" fontWeight="700" textAnchor="middle" fill="currentColor" stroke="none">10</text></>,
   fwd: <><path d="M20 12a8 8 0 1 1-2.4-5.7M20 4.5v4h-4" /><text x="11.6" y="15.2" fontSize="7" fontWeight="700" textAnchor="middle" fill="currentColor" stroke="none">10</text></>,
 };
