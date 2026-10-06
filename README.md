@@ -35,31 +35,57 @@
 
 ## Установка на телефон
 
-Приложение — устанавливаемое веб-приложение (PWA), работает офлайн.
+### Android — приложение
+Каждый пуш в `main` собирает APK в GitHub Actions («Приложение iPhone и Android») и выкладывает его в
+**Releases → android-latest → archive-android.apk**. Скачайте файл на телефон и откройте; Android попросит
+разрешить установку из этого источника. Это тестовая (debug) сборка, подписанная ключом отладки.
 
+### iPhone — приложение
+Apple разрешает ставить приложения на iPhone только с подписью разработчика, поэтому нужен Mac с Xcode
+(хватит бесплатного Apple ID, приложение будет работать 7 дней до переустановки; с платным аккаунтом — год и TestFlight):
+
+```bash
+npm install
+npm run build
+npx cap add ios          # один раз
+npm run native:setup     # разрешения, тёмная тема, портретная ориентация
+npx cap sync ios
+npx cap open ios         # в Xcode: Signing & Capabilities → Team → свой Apple ID, затем Run на подключённом iPhone
+```
+
+GitHub Actions проверяет, что проект для iPhone собирается (симулятор, без подписи).
+
+### Без установки (PWA)
 - **iPhone:** открыть адрес приложения в Safari → «Поделиться» → «На экран „Домой“».
 - **Android:** открыть в Chrome → меню → «Установить приложение».
 
-Нужен адрес с HTTPS (требование iOS/Android для камеры, микрофона и шифрования кода).
+Нужен адрес с HTTPS (требование iOS/Android для камеры, микрофона и шифрования).
 
 ## Разработка
 
 ```bash
 npm install
-npm run dev      # локально, доступно с телефона в той же сети
-npm run build    # готовая сборка в dist/
+npm run dev             # локально, доступно с телефона в той же сети
+npm run build           # готовая сборка в dist/
+npm run native:android  # собрать и открыть в Android Studio (после npx cap add android и npm run native:setup)
+npm run native:ios      # собрать и открыть в Xcode
 ```
 
-Стек: React 18, Vite 5, без сторонних UI-библиотек. Структура:
+Нативная часть — Capacitor 7 (`capacitor.config.json`, плагины: haptics, app, share, filesystem,
+privacy-screen, native-biometric). Иконка и заставка — `assets/`. Сборочные скрипты — `scripts/ci-android.sh`, `scripts/ci-ios.sh`.
+
+Стек: React 18, Vite 5, Capacitor 7, без сторонних UI-библиотек. Структура:
 
 ```
 src/
   App.jsx            маршрутизация экранов
   store.jsx          данные архива, корзина, избранное, папки
-  security.jsx       блокировка
+  security.jsx       блокировка, шифрование, автозамок, биометрия
+  prefs.jsx          оформление и настройки интерфейса
+  native.js          связка с приложением (Capacitor)
   ui.jsx             навигация, всплывающие окна, уведомления
   actions.js         действия с материалами
-  lib/               хранилище, импорт медиа, резервные копии
+  lib/               хранилище и шифрование, ключи, импорт медиа и переписок, жесты, резервные копии
   components/        общие элементы, иконки, меню
   screens/           экраны
 ```
