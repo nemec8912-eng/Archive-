@@ -1,3 +1,13 @@
-import React,{useState} from'react';import{createRoot}from'react-dom/client';import{Plus,Search,LockKeyhole,ChevronLeft}from'lucide-react';import'./style.css';
-const demo=[{id:1,name:'Алина',count:0},{id:2,name:'Мария',count:0}];const tabs=['Фото','Видео','Скриншоты','Аудио','Текст'];
-function App(){const[p,setP]=useState(null);return <main>{!p?<><header><div><small>ЛИЧНЫЙ</small><h1>Архив</h1></div><LockKeyhole/></header><div className="search"><Search size={18}/>Поиск по людям</div><section className="people">{demo.map(x=><button className="person" onClick={()=>setP(x)} key={x.id}><div className="avatar">{x.name[0]}</div><b>{x.name}</b><span>{x.count} материалов</span></button>)}<button className="person add"><div className="avatar"><Plus/></div><b>Добавить человека</b></button></section></>:<><header><button className="back" onClick={()=>setP(null)}><ChevronLeft/></button><div><small>КАРТОЧКА</small><h1>{p.name}</h1></div></header><div className="hero"><div className="bigavatar">{p.name[0]}</div><button>Изменить фото</button></div><nav>{tabs.map(t=><button key={t}>{t}</button>)}</nav><div className="empty"><LockKeyhole/><h2>Здесь пока пусто</h2><p>Добавленные материалы будут доступны только после разблокировки архива.</p><button className="primary"><Plus/>Добавить</button></div></>}</main>}createRoot(document.getElementById('root')).render(<App/>);
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import App from './App.jsx';
+import './styles.css';
+
+createRoot(document.getElementById('root')).render(<App />);
+
+// Офлайн-режим и установка на экран «Домой» (iPhone и Android).
+if ('serviceWorker' in navigator && import.meta.env.PROD) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
+}
