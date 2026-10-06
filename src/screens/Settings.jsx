@@ -5,6 +5,8 @@ import { FolderRow } from './Folders.jsx';
 import { useStore } from '../store.jsx';
 import { useNav, useUi } from '../ui.jsx';
 import { useSecurity } from '../security.jsx';
+import { usePrefs, ACCENTS } from '../prefs.jsx';
+import { haptic } from '../lib/haptics.js';
 import { createBackup, readBackup, restoreBackup } from '../lib/backup.js';
 import { downloadBlob } from '../lib/media.js';
 import { fmtSize, fmtDate, filesWord } from '../lib/format.js';
@@ -41,6 +43,7 @@ export default function Settings() {
   const { used, quota } = useStorageInfo(store.items);
   const pct = quota ? Math.min(100, Math.max(1, (used / quota) * 100)) : 0;
   const hiddenCount = store.folders.filter((f) => f.hidden).length;
+  const prefs = usePrefs();
 
   return (
     <div className="screen with-nav">
@@ -71,6 +74,35 @@ export default function Settings() {
         </div>
         <div className="storage-bar"><i style={{ width: `${pct}%` }} /></div>
         <Row icon="backup" label="Резервное копирование" onClick={() => nav.push({ name: 'backup' })} />
+      </div>
+
+      <h4 className="set-group">Оформление</h4>
+      <div className="set-card">
+        <div className="set-row static">
+          <span className="set-icon"><Icon name="palette" size={20} /></span>
+          <span className="set-label">Акцентный цвет</span>
+          <span className="set-value">{ACCENTS.find((a) => a.id === prefs.accent)?.title}</span>
+        </div>
+        <div className="swatches" role="radiogroup" aria-label="Акцентный цвет">
+          {ACCENTS.map((a) => (
+            <button
+              key={a.id}
+              role="radio"
+              aria-checked={prefs.accent === a.id}
+              aria-label={a.title}
+              className={`swatch ${prefs.accent === a.id ? 'on' : ''}`}
+              style={{ '--sw': a.color }}
+              onClick={() => { haptic('selection'); prefs.set({ accent: a.id }); }}
+            >
+              {prefs.accent === a.id && <Icon name="check" size={16} />}
+            </button>
+          ))}
+        </div>
+        <button className="set-row" onClick={() => { haptic('selection'); prefs.set({ largeFont: !prefs.largeFont }); }} role="switch" aria-checked={prefs.largeFont}>
+          <span className="set-icon"><Icon name="textSize" size={20} /></span>
+          <span className="set-label">Крупный шрифт</span>
+          <Toggle on={prefs.largeFont} />
+        </button>
       </div>
 
       <h4 className="set-group">О приложении</h4>

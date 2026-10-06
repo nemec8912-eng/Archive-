@@ -4,6 +4,7 @@ import { TopBar, ItemRow, Empty } from '../components/Common.jsx';
 import { useStore } from '../store.jsx';
 import { useUi } from '../ui.jsx';
 import { fmtDate, filesWord } from '../lib/format.js';
+import { haptic } from '../lib/haptics.js';
 
 // Корзина (ТЗ, п. 16): восстановить, удалить навсегда, очистить — только с подтверждением.
 export default function Trash() {
@@ -49,7 +50,7 @@ export default function Trash() {
                   meta={`Удалено ${fmtDate(it.deletedAt)}${originName(it) ? ` • из «${originName(it)}»` : ''}`}
                 />
                 <div className="trash-actions">
-                  <button className="btn soft" onClick={() => { store.restore([it.id]); ui.showToast(originName(it) ? `Восстановлено в «${originName(it)}»` : 'Восстановлено'); }}>
+                  <button className="btn soft" onClick={() => { haptic('success'); store.restore([it.id]); ui.showToast(originName(it) ? `Восстановлено в «${originName(it)}»` : 'Восстановлено'); }}>
                     <Icon name="restore" size={18} />Восстановить
                   </button>
                   <button className="btn soft danger" onClick={() => purgeOne(it)}>

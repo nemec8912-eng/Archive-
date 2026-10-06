@@ -2,6 +2,7 @@ import { useStore } from './store.jsx';
 import { useNav, useUi } from './ui.jsx';
 import { VISUAL } from './lib/categories.js';
 import { shareItem } from './lib/media.js';
+import { haptic } from './lib/haptics.js';
 
 // Общая логика действий с материалами (ТЗ, п. 15).
 export function useActions() {
@@ -25,10 +26,11 @@ export function useActions() {
   };
 
   const remove = (ids, after) => {
+    haptic('medium');
     store.trash(ids);
     ui.showToast(ids.length > 1 ? `Перемещено в корзину: ${ids.length}` : 'Перемещено в корзину', {
       label: 'Отменить',
-      run: () => store.restore(ids),
+      run: () => { haptic('light'); store.restore(ids); },
     });
     after?.();
   };
@@ -45,6 +47,7 @@ export function useActions() {
     ui.pickFolder({
       title: 'Переместить в…',
       onPick: (folderId) => {
+        haptic('light');
         store.move(ids, folderId);
         ui.showToast('Перемещено');
       },
@@ -60,6 +63,7 @@ export function useActions() {
     });
 
   const toggleFav = (ids, value) => {
+    haptic(value ? 'success' : 'light');
     store.setFavorite(ids, value);
     ui.showToast(value ? 'Добавлено в избранное' : 'Убрано из избранного');
   };

@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import Icon from '../components/Icon.jsx';
 import { TopBar } from '../components/Common.jsx';
 import { useStore } from '../store.jsx';
-import { useNav } from '../ui.jsx';
+import { useNav, Fixed } from '../ui.jsx';
 import { useActions } from '../actions.js';
 import { useBlobUrl } from '../lib/hooks.js';
 import { fmtDur, fmtDate } from '../lib/format.js';
@@ -115,6 +115,7 @@ export default function VoicePlayer({ route }) {
           <span className="rate ghost" />
         </div>
       </div>
+      <Fixed>
       <div className="action-bar fixed">
         <button className={item.favorite ? 'on' : ''} onClick={() => act.toggleFav([item.id], !item.favorite)}>
           <Icon name={item.favorite ? 'heartFill' : 'heart'} size={22} /><span>{item.favorite ? 'В избранном' : 'В избранное'}</span>
@@ -122,6 +123,7 @@ export default function VoicePlayer({ route }) {
         <button onClick={() => act.remove([item.id])}><Icon name="trash" size={22} /><span>Удалить</span></button>
         <button onClick={() => act.menu(item, { inViewer: true })}><Icon name="more" size={22} /><span>Ещё</span></button>
       </div>
+      </Fixed>
     </div>
   );
 }

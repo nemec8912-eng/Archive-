@@ -1,8 +1,9 @@
 import React, { useMemo, useState } from 'react';
 import Icon from '../components/Icon.jsx';
-import { TopBar, Tile, ItemRow, Empty } from '../components/Common.jsx';
+import { TopBar, Tile, ItemRow, Empty, Tip } from '../components/Common.jsx';
 import { useStore } from '../store.jsx';
-import { useUi } from '../ui.jsx';
+import { useUi, Fixed } from '../ui.jsx';
+import { haptic } from '../lib/haptics.js';
 import { useActions } from '../actions.js';
 import { CATEGORY, VISUAL } from '../lib/categories.js';
 import { filesWord } from '../lib/format.js';
@@ -29,14 +30,18 @@ export default function Collection({ route }) {
   const title = isFav ? 'Избранное' : route.kind === 'category' ? CATEGORY[route.type].title : folder?.name || 'Папка';
   const asGrid = isFav || route.kind === 'folder' || VISUAL.has(route.type);
 
-  const toggle = (id) =>
+  const toggle = (id) => {
+    haptic('selection');
     setSel((s) => {
       const n = new Set(s);
       if (n.has(id)) n.delete(id); else n.add(id);
       return n;
     });
+  };
   const endSelect = () => { setSelecting(false); setSel(new Set()); };
-  const ids = [...sel];
+  const ids = [...sel].filter((id) => items.some((i) => i.id === id));
+  const allSelected = items.length > 0 && ids.length === items.length;
+  const selectAll = () => { haptic('selection'); setSel(allSelected ? new Set() : new Set(items.map((i) => i.id))); };
   const allFav = ids.length > 0 && ids.every((id) => store.byId[id]?.favorite);
 
   const onOpen = (item) => (selecting ? toggle(item.id) : act.open(item, items));
@@ -52,9 +57,10 @@ export default function Collection({ route }) {
   return (
     <div className={`screen ${selecting ? 'with-selbar' : 'with-nav'}`}>
       <TopBar
-        title={title}
-        sub={folder || isFav ? filesWord(items.length) : undefined}
+        title={selecting ? (ids.length ? `Выбрано: ${ids.length}` : 'Выберите') : title}
+        sub={selecting ? `из ${items.length}` : folder || isFav ? filesWord(items.length) : undefined}
         back={!isFav}
+        left={selecting ? <button className="link-btn" onClick={selectAll}>{allSelected ? 'Снять' : 'Все'}</button> : undefined}
         right={
           items.length > 0 && (
             <button className="link-btn" onClick={() => (selecting ? endSelect() : setSelecting(true))}>
@@ -71,11 +77,14 @@ export default function Collection({ route }) {
           action={!isFav && <button className="btn primary" onClick={() => ui.open({ type: 'add' })}><Icon name="plus" size={18} />Добавить</button>}
         />
       ) : asGrid ? (
+        <>
+        <Tip id="longpress" icon="hand">Удерживайте материал, чтобы открыть действия. «Выбрать» — несколько сразу.</Tip>
         <div className="grid">
           {items.map((it) => (
             <Tile key={it.id} item={it} selecting={selecting} selected={sel.has(it.id)} onOpen={() => onOpen(it)} onLong={() => onLong(it)} />
           ))}
         </div>
+        </>
       ) : (
         <div className="list">
           {items.map((it) => (
@@ -85,8 +94,8 @@ export default function Collection({ route }) {
       )}
 
       {selecting && (
+        <Fixed>
         <div className="sel-bar">
-          <span className="sel-count">{ids.length ? `Выбрано: ${ids.length}` : 'Выберите материалы'}</span>
           <div className="sel-actions">
             <button disabled={!ids.length} onClick={() => { act.toggleFav(ids, !allFav); endSelect(); }}>
               <Icon name={allFav ? 'heartFill' : 'heart'} size={22} /><span>{allFav ? 'Убрать' : 'В избранное'}</span>
@@ -99,6 +108,7 @@ export default function Collection({ route }) {
             </button>
           </div>
         </div>
+        </Fixed>
       )}
     </div>
   );

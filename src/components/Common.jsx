@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Icon from './Icon.jsx';
 import { useNav, useUi } from '../ui.jsx';
+import { usePrefs } from '../prefs.jsx';
+import { haptic } from '../lib/haptics.js';
 import { useBlobUrl, useInView, useLongPress } from '../lib/hooks.js';
 import { fmtDur, fmtDate, fmtSize } from '../lib/format.js';
 import { CATEGORY } from '../lib/categories.js';
@@ -37,7 +39,7 @@ export function BottomNav() {
     <nav className="bottom-nav">
       {btn('home', 'home', 'Главная')}
       {btn('folders', 'folder', 'Папки')}
-      <button className="nav-add" onClick={() => ui.open({ type: 'add' })} aria-label="Добавить">
+      <button className="nav-add" onClick={() => { haptic('light'); ui.open({ type: 'add' }); }} aria-label="Добавить">
         <Icon name="plus" size={28} />
       </button>
       {btn('favorites', 'star', 'Избранное')}
@@ -61,13 +63,24 @@ function MiniWave({ data = [], bars = 22 }) {
   );
 }
 
+// Миниатюра загружается из хранилища устройства; пока её нет — мерцающий скелетон.
+function ThumbImg({ url }) {
+  const [loaded, setLoaded] = useState(false);
+  return (
+    <>
+      {!loaded && <div className="skeleton" />}
+      <img src={url} alt="" draggable="false" className={loaded ? 'loaded' : ''} onLoad={() => setLoaded(true)} onError={() => setLoaded(true)} />
+    </>
+  );
+}
+
 export function Thumb({ item, className = '' }) {
   const [ref, seen] = useInView();
   const url = useBlobUrl(item.thumbId, { cache: true, enabled: seen });
   if (item.type === 'photo' || item.type === 'screenshot' || item.type === 'video') {
     return (
       <div ref={ref} className={`thumb ${className}`}>
-        {url ? <img src={url} alt="" draggable="false" /> : <div className="thumb-ph"><TypeIcon type={item.type} size={26} /></div>}
+        {url ? <ThumbImg key={url} url={url} /> : item.thumbId ? <div className="skeleton" /> : <div className="thumb-ph"><TypeIcon type={item.type} size={26} /></div>}
         {item.type === 'video' && (
           <span className="badge"><Icon name="videoCam" size={14} />{item.duration ? fmtDur(item.duration) : ''}</span>
         )}
@@ -137,13 +150,41 @@ export function ItemRow({ item, onOpen, onLong, selecting, selected, right, meta
   );
 }
 
+// Иллюстрация пустого экрана: стопка карточек с иконкой раздела.
+export function EmptyArt({ icon }) {
+  return (
+    <div className="empty-art" aria-hidden="true">
+      <span className="ea-glow" />
+      <span className="ea-card back" />
+      <span className="ea-card mid" />
+      <span className="ea-card front"><Icon name={icon} size={34} /></span>
+      <span className="ea-spark s1" />
+      <span className="ea-spark s2" />
+      <span className="ea-spark s3" />
+    </div>
+  );
+}
+
 export function Empty({ icon = 'folder', title, text, action }) {
   return (
     <div className="empty">
-      <div className="empty-icon"><Icon name={icon} size={30} /></div>
+      <EmptyArt icon={icon} />
       <h3>{title}</h3>
       {text && <p>{text}</p>}
       {action}
+    </div>
+  );
+}
+
+// Одноразовая подсказка; после закрытия больше не показывается.
+export function Tip({ id, icon = 'info', children }) {
+  const prefs = usePrefs();
+  if (!prefs.onboarded || prefs.tipSeen(id)) return null;
+  return (
+    <div className="tip" role="note">
+      <span className="tip-icon"><Icon name={icon} size={18} /></span>
+      <span className="tip-text">{children}</span>
+      <button className="tip-close" onClick={() => prefs.markTip(id)} aria-label="Понятно"><Icon name="close" size={16} /></button>
     </div>
   );
 }

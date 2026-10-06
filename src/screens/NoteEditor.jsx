@@ -9,6 +9,7 @@ import { saveBlob, deleteBlobs, uid } from '../lib/db.js';
 import { imageInfo, audioInfo } from '../lib/media.js';
 import { stamp } from '../lib/format.js';
 import { VoiceBubble } from './ChatView.jsx';
+import { haptic } from '../lib/haptics.js';
 
 function PhotoAttachment({ a, onRemove }) {
   const url = useBlobUrl(a.thumbId || a.blobId, { cache: true });
@@ -94,6 +95,7 @@ export default function NoteEditor({ route }) {
     added.current = [];
     removed.current = [];
     setDirty(false);
+    haptic('success');
     ui.showToast('Заметка сохранена');
     nav.back();
   };

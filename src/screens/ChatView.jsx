@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import Icon from '../components/Icon.jsx';
 import { TopBar } from '../components/Common.jsx';
 import { useStore } from '../store.jsx';
-import { useNav } from '../ui.jsx';
+import { useNav, Fixed } from '../ui.jsx';
 import { useActions } from '../actions.js';
 import { useBlobUrl } from '../lib/hooks.js';
 import { fmtDate, fmtTime, fmtDur } from '../lib/format.js';
@@ -57,6 +57,7 @@ export default function ChatView({ route }) {
         ))}
         {!(item.messages || []).length && <p className="hint">Переписка пустая</p>}
       </div>
+      <Fixed>
       <div className="action-bar fixed">
         <button onClick={() => act.share(item)}><Icon name="share" size={22} /><span>Поделиться</span></button>
         <button className={item.favorite ? 'on' : ''} onClick={() => act.toggleFav([item.id], !item.favorite)}>
@@ -65,6 +66,7 @@ export default function ChatView({ route }) {
         <button onClick={() => act.remove([item.id])}><Icon name="trash" size={22} /><span>Удалить</span></button>
         <button onClick={() => act.menu(item, { inViewer: true })}><Icon name="more" size={22} /><span>Ещё</span></button>
       </div>
+      </Fixed>
     </div>
   );
 }

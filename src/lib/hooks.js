@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { getBlob } from './db.js';
+import { haptic } from './haptics.js';
 
 const thumbCache = new Map();
 
@@ -53,7 +54,7 @@ export function useLongPress(onLong, onClick, ms = 450) {
       clear();
       timer.current = setTimeout(() => {
         fired.current = true;
-        if (navigator.vibrate) navigator.vibrate(10);
+        haptic('medium');
         onLong?.();
       }, ms);
     },

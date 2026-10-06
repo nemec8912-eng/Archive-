@@ -2,6 +2,8 @@ import React from 'react';
 import { StoreProvider, useStore } from './store.jsx';
 import { NavProvider, UiProvider, useNav } from './ui.jsx';
 import { SecurityProvider, useSecurity } from './security.jsx';
+import { PrefsProvider } from './prefs.jsx';
+import Onboarding from './components/Onboarding.jsx';
 import { BottomNav } from './components/Common.jsx';
 import { SheetHost, Toast } from './components/Sheets.jsx';
 import Home from './screens/Home.jsx';
@@ -50,25 +52,28 @@ function Shell() {
   const route = nav.top;
   const key = `${nav.stack.length}-${route.name}-${route.id || route.folderId || route.type || ''}`;
   return (
-    <div className="app">
+    <div className="app" data-nav={nav.dir}>
       <Screen key={key} route={route} />
       {WITH_NAV.has(route.name) && <BottomNav />}
       <SheetHost />
       <Toast />
+      <Onboarding />
     </div>
   );
 }
 
 export default function App() {
   return (
-    <SecurityProvider>
-      <StoreProvider>
-        <NavProvider>
-          <UiProvider>
-            <Shell />
-          </UiProvider>
-        </NavProvider>
-      </StoreProvider>
-    </SecurityProvider>
+    <PrefsProvider>
+      <SecurityProvider>
+        <StoreProvider>
+          <NavProvider>
+            <UiProvider>
+              <Shell />
+            </UiProvider>
+          </NavProvider>
+        </StoreProvider>
+      </SecurityProvider>
+    </PrefsProvider>
   );
 }

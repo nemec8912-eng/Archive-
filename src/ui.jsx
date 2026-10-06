@@ -1,4 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 const NavCtx = createContext(null);
 const UiCtx = createContext(null);
@@ -8,11 +9,14 @@ export const TABS = ['home', 'folders', 'favorites', 'settings'];
 // Простая навигация стеком экранов; кнопка «Назад» Android/жест iOS поддерживаются через history.
 export function NavProvider({ children }) {
   const [stack, setStack] = useState([{ name: 'home' }]);
+  // Направление последнего перехода — для анимации экранов.
+  const [dir, setDir] = useState('none');
   const stackRef = useRef(stack);
   stackRef.current = stack;
 
   useEffect(() => {
     const onPop = () => {
+      if (stackRef.current.length > 1) setDir('pop');
       setStack((s) => (s.length > 1 ? s.slice(0, -1) : s));
     };
     window.addEventListener('popstate', onPop);
@@ -21,13 +25,16 @@ export function NavProvider({ children }) {
 
   const api = useMemo(() => ({
     stack,
+    dir,
     top: stack[stack.length - 1],
     tab: stack[0].name,
     push(route) {
       window.history.pushState({ d: stackRef.current.length }, '');
+      setDir('push');
       setStack((s) => [...s, route]);
     },
     replace(route) {
+      setDir('none');
       setStack((s) => [...s.slice(0, -1), route]);
     },
     back() {
@@ -35,10 +42,12 @@ export function NavProvider({ children }) {
     },
     goTab(name) {
       const extra = stackRef.current.length - 1;
+      if (extra === 0 && stackRef.current[0].name === name) return;
+      setDir('tab');
       setStack([{ name }]);
       if (extra > 0) window.history.go(-extra);
     },
-  }), [stack]);
+  }), [stack, dir]);
 
   return <NavCtx.Provider value={api}>{children}</NavCtx.Provider>;
 }
@@ -67,6 +76,11 @@ export function UiProvider({ children }) {
   }), [sheet, toast, showToast]);
 
   return <UiCtx.Provider value={api}>{children}</UiCtx.Provider>;
+}
+
+// Нижние панели экрана выносятся из анимируемого экрана, чтобы оставаться прижатыми к низу.
+export function Fixed({ children }) {
+  return createPortal(children, document.body);
 }
 
 export const useNav = () => useContext(NavCtx);

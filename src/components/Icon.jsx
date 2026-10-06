@@ -48,6 +48,9 @@ const P = {
   backspace: <><path d="M9 5h10.5A1.5 1.5 0 0 1 21 6.5v11a1.5 1.5 0 0 1-1.5 1.5H9l-6-7z" /><path d="M12.5 9.5l5 5M17.5 9.5l-5 5" /></>,
   shield: <path d="M12 3l7.5 3v5.5c0 4.5-3.2 8.3-7.5 9.5-4.3-1.2-7.5-5-7.5-9.5V6z" />,
   storage: <><ellipse cx="12" cy="6" rx="7.5" ry="3" /><path d="M4.5 6v12c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3V6M4.5 12c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3" /></>,
+  hand: <><path d="M9 11.5V5.2a1.6 1.6 0 0 1 3.2 0v5.3" /><path d="M12.2 10.2V8.6a1.6 1.6 0 0 1 3.2 0v2" /><path d="M15.4 10.4a1.6 1.6 0 0 1 3.1.4v3.7c0 3.6-2.6 6.5-6.2 6.5h-.6a6 6 0 0 1-4.6-2.2l-2.6-3.3a1.6 1.6 0 0 1 2.4-2.1L9 15.1v-3.6" /></>,
+  palette: <><path d="M12 3a9 9 0 1 0 0 18c1.2 0 1.8-.8 1.8-1.7 0-1.3-1.1-1.7-1.1-2.8 0-.9.7-1.5 1.7-1.5H17a4 4 0 0 0 4-4C21 6.6 17 3 12 3z" /><circle cx="7.5" cy="11.5" r="1.2" fill="currentColor" stroke="none" /><circle cx="10" cy="7.5" r="1.2" fill="currentColor" stroke="none" /><circle cx="14.5" cy="7.5" r="1.2" fill="currentColor" stroke="none" /></>,
+  textSize: <><path d="M3 18 7.5 6h1L13 18M4.6 14h6.8" /><path d="M14.5 18l3-8h.6l3 8M15.5 15.5h4.8" /></>,
   rew: <><path d="M4 12a8 8 0 1 0 2.4-5.7M4 4.5v4h4" /><text x="12.4" y="15.2" fontSize="7" fontWeight="700" textAnchor="middle" fill="currentColor" stroke="none">10</text></>,
   fwd: <><path d="M20 12a8 8 0 1 1-2.4-5.7M20 4.5v4h-4" /><text x="11.6" y="15.2" fontSize="7" fontWeight="700" textAnchor="middle" fill="currentColor" stroke="none">10</text></>,
 };

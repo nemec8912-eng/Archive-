@@ -3,14 +3,17 @@ import Icon from '../components/Icon.jsx';
 import { TopBar } from '../components/Common.jsx';
 import { useSecurity } from '../security.jsx';
 import { useNav, useUi } from '../ui.jsx';
+import { haptic } from '../lib/haptics.js';
 
 const LEN = 4;
 
 export function PinPad({ title, sub, error, onComplete, resetKey }) {
   const [pin, setPin] = useState('');
   useEffect(() => { setPin(''); }, [resetKey]);
+  useEffect(() => { if (error) haptic('error'); }, [error, resetKey]);
   const press = (d) => {
     if (pin.length >= LEN) return;
+    haptic('selection');
     const next = pin + d;
     setPin(next);
     if (next.length === LEN) setTimeout(() => onComplete(next), 120);

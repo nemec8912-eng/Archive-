@@ -3,6 +3,8 @@ import Icon from './Icon.jsx';
 import { Thumb, TypeIcon } from './Common.jsx';
 import { useUi, useNav } from '../ui.jsx';
 import { useStore } from '../store.jsx';
+import { usePrefs } from '../prefs.jsx';
+import { haptic } from '../lib/haptics.js';
 import { importFile, audioExt, audioInfo } from '../lib/media.js';
 import { saveBlob, uid } from '../lib/db.js';
 import { fmtDur, fmtSize, fmtDate, filesWord, stamp } from '../lib/format.js';
@@ -68,6 +70,7 @@ export function Recorder({ onDone, onCancel }) {
       };
       rec.current = r;
       r.start();
+      haptic('medium');
       started.current = Date.now();
       setState('rec');
       timer.current = setInterval(() => setElapsed((Date.now() - started.current) / 1000), 200);
@@ -77,6 +80,7 @@ export function Recorder({ onDone, onCancel }) {
   };
 
   const stop = () => {
+    haptic('medium');
     clearInterval(timer.current);
     setState('saving');
     rec.current?.stop();
@@ -153,7 +157,7 @@ function Confirm({ title, text, okText = 'Удалить', danger = true, onOk, 
         {text && <p>{text}</p>}
         <div className="dialog-actions">
           <button className="btn ghost" onClick={onClose}>Отмена</button>
-          <button className={`btn ${danger ? 'danger' : 'primary'}`} onClick={() => { onClose(); onOk(); }}>{okText}</button>
+          <button className={`btn ${danger ? 'danger' : 'primary'}`} onClick={() => { haptic(danger ? 'warning' : 'light'); onClose(); onOk(); }}>{okText}</button>
         </div>
       </div>
     </div>
@@ -197,6 +201,7 @@ function ItemHeader({ item }) {
 }
 
 function Help({ onClose }) {
+  const prefs = usePrefs();
   return (
     <Sheet title="Помощь и поддержка" onClose={onClose}>
       <div className="help-text">
@@ -206,6 +211,9 @@ function Help({ onClose }) {
         <p><b>Удаление.</b> Удалённое попадает в Корзину (Папки → Корзина). Оттуда можно восстановить или удалить навсегда.</p>
         <p><b>Сохранность.</b> Регулярно делайте резервную копию: Настройки → Резервное копирование. Если удалить приложение или очистить данные браузера, материалы будут потеряны.</p>
       </div>
+      <button className="btn ghost help-tips" onClick={() => { prefs.resetTips(); onClose(); }}>
+        <Icon name="info" size={18} />Показать подсказки снова
+      </button>
     </Sheet>
   );
 }
@@ -233,6 +241,7 @@ export function SheetHost() {
           }
         }
         store.addItems(list);
+        haptic(list.length ? 'success' : 'error');
         ui.showToast(list.length ? `Добавлено: ${filesWord(list.length)}` : 'Не удалось добавить файл');
       },
     });
@@ -265,6 +274,7 @@ export function SheetHost() {
           deletedAt: null,
         };
         store.addItems([item]);
+        haptic('success');
         ui.showToast('Голосовое сохранено');
       },
     });
