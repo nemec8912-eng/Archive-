@@ -53,7 +53,7 @@ export default function Search() {
       {results.length ? (
         <div className="list">
           {results.map((it) => (
-            <ItemRow key={it.id} item={it} onOpen={() => act.open(it, results)} onLong={() => act.menu(it, { list: results })} />
+            <ItemRow key={it.id} item={it} onOpen={() => act.open(it, results)} onLong={() => act.peek(it, { list: results })} swipe={act.swipe(it)} />
           ))}
         </div>
       ) : (

@@ -4,6 +4,7 @@ import { NavProvider, UiProvider, useNav } from './ui.jsx';
 import { SecurityProvider, useSecurity } from './security.jsx';
 import { PrefsProvider } from './prefs.jsx';
 import Onboarding from './components/Onboarding.jsx';
+import { useEdgeSwipe } from './lib/gestures.js';
 import { BottomNav } from './components/Common.jsx';
 import { SheetHost, Toast } from './components/Sheets.jsx';
 import Home from './screens/Home.jsx';
@@ -44,6 +45,7 @@ function Shell() {
   const store = useStore();
   const nav = useNav();
   const sec = useSecurity();
+  useEdgeSwipe(!sec.locked && store.ready && nav.canGoBack && nav.top.name !== 'viewer', nav.requestBack);
 
   // Пока архив заблокирован, содержимое вообще не отрисовывается.
   if (sec.locked) return <LockScreen />;

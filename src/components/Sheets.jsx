@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Icon from './Icon.jsx';
+import Peek from './Peek.jsx';
 import { Thumb, TypeIcon } from './Common.jsx';
 import { useUi, useNav } from '../ui.jsx';
 import { useStore } from '../store.jsx';
@@ -318,6 +319,16 @@ export function SheetHost() {
         {s.item && <ItemHeader item={s.item} />}
         <MenuList items={s.actions} onPick={(a) => { close(); a.run(); }} />
       </Sheet>
+    );
+  } else if (s?.type === 'peek') {
+    content = (
+      <Peek
+        item={store.byId[s.item.id] || s.item}
+        actions={s.actions}
+        onOpen={() => { close(); s.onOpen(); }}
+        onPick={(a) => { close(); a.run(); }}
+        onClose={close}
+      />
     );
   } else if (s?.type === 'folderPicker') {
     content = <FolderPicker title={s.title} onPick={s.onPick} onClose={close} />;

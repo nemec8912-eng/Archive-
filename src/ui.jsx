@@ -13,6 +13,7 @@ export function NavProvider({ children }) {
   const [dir, setDir] = useState('none');
   const stackRef = useRef(stack);
   stackRef.current = stack;
+  const guardRef = useRef(null); // экран может перехватить «назад» (например, несохранённая заметка)
 
   useEffect(() => {
     const onPop = () => {
@@ -40,6 +41,13 @@ export function NavProvider({ children }) {
     back() {
       if (stackRef.current.length > 1) window.history.back();
     },
+    // «Назад» жестом: сначала спрашиваем экран, можно ли уйти.
+    requestBack() {
+      if (guardRef.current) guardRef.current();
+      else if (stackRef.current.length > 1) window.history.back();
+    },
+    setGuard(fn) { guardRef.current = fn; },
+    canGoBack: stack.length > 1,
     goTab(name) {
       const extra = stackRef.current.length - 1;
       if (extra === 0 && stackRef.current[0].name === name) return;

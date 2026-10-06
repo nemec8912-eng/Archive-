@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import Icon from '../components/Icon.jsx';
 import { TopBar, Tile, ItemRow, Empty, Tip } from '../components/Common.jsx';
 import { useStore } from '../store.jsx';
@@ -6,7 +6,10 @@ import { useUi, Fixed } from '../ui.jsx';
 import { haptic } from '../lib/haptics.js';
 import { useActions } from '../actions.js';
 import { CATEGORY, VISUAL } from '../lib/categories.js';
-import { filesWord } from '../lib/format.js';
+import { filesWord, groupByDay } from '../lib/format.js';
+import { usePrefs } from '../prefs.jsx';
+
+const COLS = [2, 3, 4, 5];
 
 // Категория, папка или «Избранное»: сетка миниатюр / список, выбор нескольких.
 export default function Collection({ route }) {
@@ -15,6 +18,10 @@ export default function Collection({ route }) {
   const act = useActions();
   const [selecting, setSelecting] = useState(false);
   const [sel, setSel] = useState(() => new Set());
+  const prefs = usePrefs();
+  const cols = COLS.includes(prefs.gridCols) ? prefs.gridCols : 3;
+  const setCols = (n) => { if (n !== cols && COLS.includes(n)) { haptic('selection'); prefs.set({ gridCols: n }); } };
+  const pinch = useRef(null);
 
   const isFav = route.name === 'favorites';
   const folder = route.kind === 'folder' ? store.folderById(route.folderId) : null;
@@ -47,7 +54,7 @@ export default function Collection({ route }) {
   const onOpen = (item) => (selecting ? toggle(item.id) : act.open(item, items));
   const onLong = (item) => {
     if (selecting) toggle(item.id);
-    else act.menu(item, { list: items });
+    else act.peek(item, { list: items });
   };
 
   const emptyText = isFav
@@ -78,17 +85,52 @@ export default function Collection({ route }) {
         />
       ) : asGrid ? (
         <>
-        <Tip id="longpress" icon="hand">Удерживайте материал, чтобы открыть действия. «Выбрать» — несколько сразу.</Tip>
-        <div className="grid">
-          {items.map((it) => (
-            <Tile key={it.id} item={it} selecting={selecting} selected={sel.has(it.id)} onOpen={() => onOpen(it)} onLong={() => onLong(it)} />
+        <Tip id="longpress" icon="hand">Удерживайте материал — быстрый просмотр и действия. Щипок по сетке меняет размер миниатюр.</Tip>
+        <div className="view-bar">
+          <span className="vb-label">{filesWord(items.length)}</span>
+          <button
+            className="icon-btn small"
+            onClick={() => setCols(COLS[(COLS.indexOf(cols) + 1) % COLS.length])}
+            aria-label={`Размер миниатюр: ${cols} в ряд`}
+          >
+            <Icon name={cols >= 4 ? 'gridSmall' : 'grid'} size={20} />
+            <span className="vb-cols">{cols}</span>
+          </button>
+        </div>
+        <div
+          className="groups"
+          onTouchStart={(e) => {
+            if (e.touches.length === 2) {
+              const [a, b] = e.touches;
+              pinch.current = { d: Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY), done: false };
+            }
+          }}
+          onTouchMove={(e) => {
+            const p = pinch.current;
+            if (!p || p.done || e.touches.length !== 2) return;
+            const [a, b] = e.touches;
+            const d = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+            if (d - p.d > 60) { setCols(cols - 1); p.done = true; }
+            if (p.d - d > 60) { setCols(cols + 1); p.done = true; }
+          }}
+          onTouchEnd={() => { pinch.current = null; }}
+        >
+          {groupByDay(items).map((grp) => (
+            <section key={grp.key} className="day-group">
+              <h4 className="day-head">{grp.label}</h4>
+              <div className="grid" style={{ '--cols': cols }}>
+                {grp.items.map((it) => (
+                  <Tile key={it.id} item={it} selecting={selecting} selected={sel.has(it.id)} onOpen={() => onOpen(it)} onLong={() => onLong(it)} />
+                ))}
+              </div>
+            </section>
           ))}
         </div>
         </>
       ) : (
         <div className="list">
           {items.map((it) => (
-            <ItemRow key={it.id} item={it} selecting={selecting} selected={sel.has(it.id)} onOpen={() => onOpen(it)} onLong={() => onLong(it)} />
+            <ItemRow key={it.id} item={it} selecting={selecting} selected={sel.has(it.id)} onOpen={() => onOpen(it)} onLong={() => onLong(it)} swipe={act.swipe(it)} />
           ))}
         </div>
       )}

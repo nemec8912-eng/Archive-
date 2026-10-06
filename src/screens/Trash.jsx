@@ -22,6 +22,12 @@ export default function Trash() {
       onOk: () => { store.purge([it.id]); ui.showToast('Удалено навсегда'); },
     });
 
+  const restoreOne = (it) => {
+    haptic('success');
+    store.restore([it.id]);
+    ui.showToast(originName(it) ? `Восстановлено в «${originName(it)}»` : 'Восстановлено');
+  };
+
   const emptyAll = () =>
     ui.confirm({
       title: 'Очистить корзину?',
@@ -48,9 +54,13 @@ export default function Trash() {
                 <ItemRow
                   item={it}
                   meta={`Удалено ${fmtDate(it.deletedAt)}${originName(it) ? ` • из «${originName(it)}»` : ''}`}
+                  swipe={[
+                    { icon: 'restore', label: 'Вернуть', tone: 'accent', run: () => restoreOne(it) },
+                    { icon: 'trash', label: 'Навсегда', tone: 'danger', run: () => purgeOne(it) },
+                  ]}
                 />
                 <div className="trash-actions">
-                  <button className="btn soft" onClick={() => { haptic('success'); store.restore([it.id]); ui.showToast(originName(it) ? `Восстановлено в «${originName(it)}»` : 'Восстановлено'); }}>
+                  <button className="btn soft" onClick={() => restoreOne(it)}>
                     <Icon name="restore" size={18} />Восстановить
                   </button>
                   <button className="btn soft danger" onClick={() => purgeOne(it)}>

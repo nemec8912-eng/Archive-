@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Icon from '../components/Icon.jsx';
 import { TopBar } from '../components/Common.jsx';
 import { useStore } from '../store.jsx';
@@ -112,6 +112,12 @@ export default function NoteEditor({ route }) {
       },
     });
   };
+
+  // Жест «назад» тоже спрашивает, если есть несохранённые изменения.
+  useEffect(() => {
+    nav.setGuard(dirty ? leave : null);
+    return () => nav.setGuard(null);
+  }, [dirty]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const canSave = text.trim() || attachments.length;
 

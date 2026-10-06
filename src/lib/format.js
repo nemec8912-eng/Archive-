@@ -46,3 +46,39 @@ export function plural(n, one, few, many) {
 }
 
 export const filesWord = (n) => `${n} ${plural(n, 'файл', 'файла', 'файлов')}`;
+
+const MONTHS = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
+
+// Заголовок группы миниатюр: «Сегодня», «Вчера», «5 октября», «5 октября 2025».
+export function dayLabel(ts, now = Date.now()) {
+  const d = new Date(ts);
+  const today = new Date(now);
+  today.setHours(0, 0, 0, 0);
+  const day = new Date(d);
+  day.setHours(0, 0, 0, 0);
+  const diff = Math.round((today - day) / 86400000);
+  if (diff === 0) return 'Сегодня';
+  if (diff === 1) return 'Вчера';
+  const base = `${d.getDate()} ${MONTHS[d.getMonth()]}`;
+  return d.getFullYear() === today.getFullYear() ? base : `${base} ${d.getFullYear()}`;
+}
+
+export function dayKey(ts) {
+  const d = new Date(ts);
+  return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+}
+
+// Делит упорядоченный по дате список на группы по дням.
+export function groupByDay(items, field = 'createdAt') {
+  const groups = [];
+  let cur = null;
+  for (const it of items) {
+    const k = dayKey(it[field]);
+    if (!cur || cur.key !== k) {
+      cur = { key: k, label: dayLabel(it[field]), items: [] };
+      groups.push(cur);
+    }
+    cur.items.push(it);
+  }
+  return groups;
+}

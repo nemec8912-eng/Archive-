@@ -71,24 +71,42 @@ export function useActions() {
   const share = (item) =>
     shareItem(item).catch(() => ui.showToast('Не удалось поделиться'));
 
-  const menu = (item, { list, inViewer = false, onDeleted } = {}) =>
+  const itemActions = (item, { list, inViewer = false, onDeleted } = {}) => [
+    !inViewer && { icon: 'open', label: 'Открыть', run: () => open(item, list) },
+    { icon: 'pencil', label: 'Переименовать', run: () => rename(item) },
+    { icon: 'folderMove', label: 'Переместить', run: () => move([item.id]) },
+    { icon: 'copy', label: 'Копировать', run: () => copy([item.id]) },
+    {
+      icon: item.favorite ? 'heartFill' : 'heart',
+      label: item.favorite ? 'Убрать из избранного' : 'В избранное',
+      run: () => toggleFav([item.id], !item.favorite),
+    },
+    { icon: 'share', label: 'Поделиться', run: () => share(item) },
+    { icon: 'trash', label: 'Удалить', danger: true, run: () => remove([item.id], onDeleted) },
+  ].filter(Boolean);
+
+  const menu = (item, opts = {}) =>
+    ui.open({ type: 'actions', item, actions: itemActions(item, opts) });
+
+  // Быстрый просмотр по долгому нажатию.
+  const peek = (item, opts = {}) =>
     ui.open({
-      type: 'actions',
+      type: 'peek',
       item,
-      actions: [
-        !inViewer && { icon: 'open', label: 'Открыть', run: () => open(item, list) },
-        { icon: 'pencil', label: 'Переименовать', run: () => rename(item) },
-        { icon: 'folderMove', label: 'Переместить', run: () => move([item.id]) },
-        { icon: 'copy', label: 'Копировать', run: () => copy([item.id]) },
-        {
-          icon: item.favorite ? 'heartFill' : 'heart',
-          label: item.favorite ? 'Убрать из избранного' : 'В избранное',
-          run: () => toggleFav([item.id], !item.favorite),
-        },
-        { icon: 'share', label: 'Поделиться', run: () => share(item) },
-        { icon: 'trash', label: 'Удалить', danger: true, run: () => remove([item.id], onDeleted) },
-      ].filter(Boolean),
+      onOpen: () => open(item, opts.list || []),
+      actions: itemActions(item, opts),
     });
 
-  return { open, menu, remove, rename, move, copy, toggleFav, share };
+  // Быстрые действия смахиванием по строке.
+  const swipe = (item) => [
+    {
+      icon: item.favorite ? 'heartFill' : 'heart',
+      label: item.favorite ? 'Убрать' : 'Избранное',
+      tone: 'accent',
+      run: () => toggleFav([item.id], !item.favorite),
+    },
+    { icon: 'trash', label: 'Удалить', tone: 'danger', run: () => remove([item.id]) },
+  ];
+
+  return { open, menu, peek, swipe, itemActions, remove, rename, move, copy, toggleFav, share };
 }

@@ -3,6 +3,7 @@ import Icon from './Icon.jsx';
 import { useNav, useUi } from '../ui.jsx';
 import { usePrefs } from '../prefs.jsx';
 import { haptic } from '../lib/haptics.js';
+import { useRowSwipe } from '../lib/gestures.js';
 import { useBlobUrl, useInView, useLongPress } from '../lib/hooks.js';
 import { fmtDur, fmtDate, fmtSize } from '../lib/format.js';
 import { CATEGORY } from '../lib/categories.js';
@@ -130,22 +131,38 @@ export function itemMeta(item) {
   return parts.join(' • ');
 }
 
-export function ItemRow({ item, onOpen, onLong, selecting, selected, right, meta }) {
+const SWIPE_BTN = 78;
+
+// Строка материала. swipe — быстрые действия, открывающиеся смахиванием влево.
+export function ItemRow({ item, onOpen, onLong, selecting, selected, right, meta, swipe }) {
   const press = useLongPress(onLong, onOpen);
+  const actions = !selecting && swipe ? swipe.filter(Boolean) : [];
+  const sw = useRowSwipe({ width: actions.length * SWIPE_BTN, enabled: actions.length > 0 });
   return (
-    <div className={`item-row ${selected ? 'selected' : ''}`}>
-      <button className="item-main" {...press}>
-        <div className="row-thumb">
-          {item.thumbId ? <Thumb item={item} /> : <div className="row-icon"><TypeIcon type={item.type} /></div>}
+    <div className={`item-row ${selected ? 'selected' : ''} ${actions.length ? 'swipeable' : ''}`} {...sw.handlers}>
+      {actions.length > 0 && (
+        <div className="swipe-actions" style={{ width: actions.length * SWIPE_BTN }}>
+          {actions.map((a) => (
+            <button key={a.label} className={`swipe-btn ${a.tone || ''}`} onClick={a.run} aria-label={a.label}>
+              <Icon name={a.icon} size={20} /><span>{a.label}</span>
+            </button>
+          ))}
         </div>
-        <div className="row-text">
-          <b>{item.name}</b>
-          <span>{meta || itemMeta(item)}</span>
-        </div>
-        {item.favorite && !selecting && <Icon name="heartFill" size={14} className="row-fav" />}
-        {selecting && <span className={`sel-mark static ${selected ? 'on' : ''}`}>{selected && <Icon name="check" size={14} />}</span>}
-      </button>
-      {right}
+      )}
+      <div className="item-slide" ref={sw.ref}>
+        <button className="item-main" {...press}>
+          <div className="row-thumb">
+            {item.thumbId ? <Thumb item={item} /> : <div className="row-icon"><TypeIcon type={item.type} /></div>}
+          </div>
+          <div className="row-text">
+            <b>{item.name}</b>
+            <span>{meta || itemMeta(item)}</span>
+          </div>
+          {item.favorite && !selecting && <Icon name="heartFill" size={14} className="row-fav" />}
+          {selecting && <span className={`sel-mark static ${selected ? 'on' : ''}`}>{selected && <Icon name="check" size={14} />}</span>}
+        </button>
+        {right}
+      </div>
     </div>
   );
 }
