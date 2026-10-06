@@ -186,6 +186,14 @@ export function chatToText(item) {
 // Поделиться: системное меню телефона, иначе — сохранить файл.
 export async function shareItem(item) {
   markExternal();
+  if (window.ArchiveNative) {
+    if (item.type === 'note' || item.type === 'chat') {
+      return window.ArchiveNative.shareText(item.name, item.type === 'note' ? item.text || '' : chatToText(item));
+    }
+    const blob = await getBlob(item.blobId);
+    if (blob) await window.ArchiveNative.saveToGallery([new File([blob], item.name, { type: item.mime || blob.type })]);
+    return undefined;
+  }
   try {
     if (item.type === 'note' || item.type === 'chat') {
       const text = item.type === 'note' ? item.text || '' : chatToText(item);
@@ -255,8 +263,7 @@ export async function saveToGallery(items) {
   }
   if (!files.length) return 0;
   markExternal();
-  const native = window.Capacitor?.isNativePlatform?.() && window.ArchiveNative?.saveToGallery;
-  if (native) return window.ArchiveNative.saveToGallery(files);
+  if (window.ArchiveNative) return window.ArchiveNative.saveToGallery(files);
   try {
     if (navigator.canShare && navigator.canShare({ files })) {
       await navigator.share({ files });
@@ -273,8 +280,7 @@ export async function saveToGallery(items) {
 export async function offerFile(blob, name) {
   const file = new File([blob], name, { type: blob.type || 'application/octet-stream' });
   markExternal();
-  const native = window.Capacitor?.isNativePlatform?.() && window.ArchiveNative?.offerFile;
-  if (native) return window.ArchiveNative.offerFile(file);
+  if (window.ArchiveNative) return window.ArchiveNative.offerFile(file);
   if (navigator.canShare && navigator.canShare({ files: [file] })) {
     try { await navigator.share({ files: [file], title: name }); return true; } catch (e) { if (e?.name === 'AbortError') return false; }
   }

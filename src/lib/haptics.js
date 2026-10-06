@@ -32,11 +32,8 @@ function iosTick() {
 
 export function haptic(kind = 'light') {
   try {
-    const native = window.Capacitor?.isNativePlatform?.() && window.Capacitor?.Plugins?.Haptics;
-    if (native) {
-      if (kind === 'selection') native.selectionChanged?.();
-      else if (kind === 'success' || kind === 'warning' || kind === 'error') native.notification?.({ type: kind.toUpperCase() });
-      else native.impact?.({ style: kind === 'heavy' ? 'HEAVY' : kind === 'medium' ? 'MEDIUM' : 'LIGHT' });
+    if (window.ArchiveNative) {
+      window.ArchiveNative.haptic(kind)?.catch?.(() => {});
       return;
     }
     if (navigator.vibrate) {

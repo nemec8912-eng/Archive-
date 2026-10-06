@@ -6,13 +6,27 @@
   "scripts": {
     "dev": "vite --host",
     "build": "vite build",
-    "preview": "vite preview --host"
+    "preview": "vite preview --host",
+    "native:setup": "node scripts/native-setup.mjs",
+    "native:sync": "npm run build && npx cap sync",
+    "native:android": "npm run native:sync && npx cap open android",
+    "native:ios": "npm run native:sync && npx cap open ios"
   },
   "dependencies": {
+    "@capacitor-community/privacy-screen": "^6.0.0",
+    "@capacitor/android": "^7.0.0",
+    "@capacitor/app": "^7.0.0",
+    "@capacitor/core": "^7.0.0",
+    "@capacitor/filesystem": "^7.0.0",
+    "@capacitor/haptics": "^7.0.0",
+    "@capacitor/ios": "^7.0.0",
+    "@capacitor/share": "^7.0.0",
+    "@capgo/capacitor-native-biometric": "^7.0.0",
     "react": "18.3.1",
     "react-dom": "18.3.1"
   },
   "devDependencies": {
+    "@capacitor/cli": "^7.0.0",
     "@vitejs/plugin-react": "4.3.4",
     "vite": "5.4.11"
   }

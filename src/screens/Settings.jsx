@@ -6,11 +6,10 @@ import { useStore } from '../store.jsx';
 import { useNav, useUi } from '../ui.jsx';
 import { useSecurity, AUTOLOCK } from '../security.jsx';
 import { biometricAvailable } from '../lib/vault.js';
-import { markExternal } from '../lib/external.js';
 import { usePrefs, ACCENTS } from '../prefs.jsx';
 import { haptic } from '../lib/haptics.js';
 import { createBackup, readBackup, restoreBackup } from '../lib/backup.js';
-import { downloadBlob } from '../lib/media.js';
+import { offerFile } from '../lib/media.js';
 import { fmtSize, fmtDate, filesWord } from '../lib/format.js';
 
 const VERSION = '1.0.0';
@@ -243,13 +242,7 @@ export function Backup() {
     setBusy('Создание копии…');
     try {
       const { blob, name } = await createBackup(store.state);
-      const file = new File([blob], name, { type: 'application/octet-stream' });
-      markExternal();
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({ files: [file], title: name }).catch(() => {});
-      } else {
-        downloadBlob(file, name);
-      }
+      await offerFile(blob, name);
       prefs.set({ lastBackupAt: Date.now() });
       ui.showToast(`Копия создана: ${fmtSize(blob.size)}`);
     } catch {

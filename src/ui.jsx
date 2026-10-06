@@ -83,6 +83,9 @@ export function UiProvider({ children }) {
     hideToast: () => setToast(null),
   }), [sheet, toast, showToast]);
 
+  // Для кнопки «Назад» Android: открытое окно закрывается первым.
+  useEffect(() => { window.__archiveUi = api; }, [api]);
+
   return <UiCtx.Provider value={api}>{children}</UiCtx.Provider>;
 }
 

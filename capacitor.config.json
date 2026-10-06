@@ -1,0 +1,20 @@
+{
+  "appId": "com.nemec8912.archive",
+  "appName": "Архив",
+  "webDir": "dist",
+  "backgroundColor": "#07080c",
+  "android": {
+    "backgroundColor": "#07080c",
+    "allowMixedContent": false,
+    "webContentsDebuggingEnabled": false
+  },
+  "ios": {
+    "backgroundColor": "#07080c",
+    "contentInset": "never",
+    "scrollEnabled": true
+  },
+  "server": {
+    "androidScheme": "https",
+    "iosScheme": "capacitor"
+  }
+}

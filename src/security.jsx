@@ -104,6 +104,7 @@ export function SecurityProvider({ children }) {
   }, [sec.lockEnabled, sec.autoLock, lock]);
 
   // ── скрытие содержимого при сворачивании (в переключателе приложений) ──
+  useEffect(() => { window.ArchiveNative?.setPrivacy(sec.privacy !== false); }, [sec.privacy]);
   useEffect(() => {
     if (sec.privacy === false) return undefined;
     const hide = () => setPrivacy(true);

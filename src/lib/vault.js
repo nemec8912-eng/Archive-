@@ -40,7 +40,7 @@ export async function unwrapWithPin(pin, rec) {
 }
 
 // ── Биометрия ──
-const native = () => window.Capacitor?.isNativePlatform?.() && window.Capacitor?.Plugins?.NativeBiometric;
+const native = () => window.ArchiveNative?.biometric;
 const BIO_SERVER = 'archive.local.vault';
 
 export async function biometricAvailable() {

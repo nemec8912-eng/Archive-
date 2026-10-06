@@ -6,3 +6,5 @@ dist
 .DS_Store
 private-media/
 uploads/
+archive-android.apk
+ci-*.log
