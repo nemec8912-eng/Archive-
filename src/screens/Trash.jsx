@@ -1,7 +1,7 @@
 import React from 'react';
 import Icon from '../components/Icon.jsx';
 import { TopBar, ItemRow, Empty } from '../components/Common.jsx';
-import { useStore } from '../store.jsx';
+import { useStore, daysLeft, TRASH_DAYS } from '../store.jsx';
 import { useUi } from '../ui.jsx';
 import { fmtDate, filesWord } from '../lib/format.js';
 import { haptic } from '../lib/haptics.js';
@@ -47,13 +47,13 @@ export default function Trash() {
         <Empty icon="trash" title="Корзина пуста" text="Удалённые материалы попадают сюда. Их можно восстановить или удалить навсегда." />
       ) : (
         <>
-          <p className="hint">Материалы хранятся в корзине, пока вы не удалите их навсегда.</p>
+          <p className="hint">Материалы удаляются из корзины автоматически через {TRASH_DAYS} дней. До этого их можно восстановить.</p>
           <div className="list">
             {items.map((it) => (
               <div key={it.id} className="trash-item">
                 <ItemRow
                   item={it}
-                  meta={`Удалено ${fmtDate(it.deletedAt)}${originName(it) ? ` • из «${originName(it)}»` : ''}`}
+                  meta={`Удалено ${fmtDate(it.deletedAt)}${originName(it) ? ` • из «${originName(it)}»` : ''} • осталось ${daysLeft(it.deletedAt)} дн.`}
                   swipe={[
                     { icon: 'restore', label: 'Вернуть', tone: 'accent', run: () => restoreOne(it) },
                     { icon: 'trash', label: 'Навсегда', tone: 'danger', run: () => purgeOne(it) },

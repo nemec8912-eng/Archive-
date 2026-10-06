@@ -60,6 +60,11 @@ const P = {
   duplicate: <><rect x="8.5" y="8.5" width="12" height="12" rx="2" /><path d="M15.5 8.5V5A1.5 1.5 0 0 0 14 3.5H5A1.5 1.5 0 0 0 3.5 5v9A1.5 1.5 0 0 0 5 15.5h3.5" /><path d="M12 14.5h5M14.5 12v5" /></>,
   pie: <><path d="M12 3a9 9 0 1 0 9 9h-9z" /><path d="M15 2.6A9 9 0 0 1 21.4 9H15z" /></>,
   gallery: <><rect x="3" y="3" width="18" height="18" rx="2.5" /><path d="M12 7.5v8M8.5 12.5 12 16l3.5-3.5" /></>,
+  eye: <><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z" /><circle cx="12" cy="12" r="3" /></>,
+  eyeOff: <><path d="M10.6 5.6c.5-.1.9-.1 1.4-.1 6 0 9.5 6.5 9.5 6.5a17 17 0 0 1-2.6 3.4M6.6 6.6C3.9 8.4 2.5 12 2.5 12S6 18.5 12 18.5c1.7 0 3.2-.5 4.5-1.2M9.9 9.9a3 3 0 0 0 4.2 4.2M3 3l18 18" /></>,
+  bell: <><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15z" /><path d="M10 20.5a2 2 0 0 0 4 0" /></>,
+  reset: <><path d="M4 12a8 8 0 1 0 2.3-5.6M4 4.5V9h4.5" /><path d="M12 8.5v4l2.5 1.5" /></>,
+  fileLock: <><path d="M14 3H6.5A1.5 1.5 0 0 0 5 4.5v15A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5V8z" /><path d="M14 3v5h5" /><rect x="9" y="13" width="6" height="4.5" rx="1" /><path d="M10.2 13v-1.3a1.8 1.8 0 0 1 3.6 0V13" /></>,
   rew: <><path d="M4 12a8 8 0 1 0 2.4-5.7M4 4.5v4h4" /><text x="12.4" y="15.2" fontSize="7" fontWeight="700" textAnchor="middle" fill="currentColor" stroke="none">10</text></>,
   fwd: <><path d="M20 12a8 8 0 1 1-2.4-5.7M20 4.5v4h-4" /><text x="11.6" y="15.2" fontSize="7" fontWeight="700" textAnchor="middle" fill="currentColor" stroke="none">10</text></>,
 };

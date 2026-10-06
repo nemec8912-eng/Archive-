@@ -8,6 +8,7 @@ import { usePrefs } from '../prefs.jsx';
 import { haptic } from '../lib/haptics.js';
 import { importFile, audioExt, audioInfo, imageInfo } from '../lib/media.js';
 import { parseChatFile, buildChatItem } from '../lib/chatImport.js';
+import { freeSpace } from './Housekeeping.jsx';
 import { saveBlob, uid } from '../lib/db.js';
 import { fmtDur, fmtSize, fmtDate, filesWord, stamp } from '../lib/format.js';
 
@@ -192,6 +193,26 @@ function Prompt({ title, value = '', placeholder, okText = 'Готово', onOk,
   );
 }
 
+// Подтверждение опасного действия вводом слова.
+function TypeConfirm({ title, text, word, okText = 'Подтвердить', onOk, onClose }) {
+  const [v, setV] = useState('');
+  const ok = v.trim().toLowerCase() === word.toLowerCase();
+  return (
+    <div className="dialog-layer" onClick={onClose}>
+      <form className="dialog" onClick={(e) => e.stopPropagation()} onSubmit={(e) => { e.preventDefault(); if (ok) { haptic('warning'); onClose(); onOk(); } }} role="alertdialog">
+        <h3>{title}</h3>
+        {text && <p>{text}</p>}
+        <p>Чтобы продолжить, введите слово <b className="confirm-word">{word}</b></p>
+        <input className="field" value={v} onChange={(e) => setV(e.target.value)} autoCapitalize="characters" autoComplete="off" aria-label={`Введите ${word}`} />
+        <div className="dialog-actions">
+          <button type="button" className="btn ghost" onClick={onClose}>Отмена</button>
+          <button type="submit" className="btn danger" disabled={!ok}>{okText}</button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
 function ItemHeader({ item }) {
   return (
     <div className="sheet-item">
@@ -214,7 +235,8 @@ function Help({ onClose }) {
         <p><b>Где хранятся материалы?</b> Только на этом устройстве, внутри приложения. Никуда не отправляются и не публикуются.</p>
         <p><b>Добавление.</b> Кнопка «+» внизу экрана: фото, видео, голосовые, заметки, скриншоты, папки.</p>
         <p><b>Действия.</b> Удерживайте материал, чтобы открыть меню: переименовать, переместить, копировать, в избранное, поделиться, удалить.</p>
-        <p><b>Удаление.</b> Удалённое попадает в Корзину (Папки → Корзина). Оттуда можно восстановить или удалить навсегда.</p>
+        <p><b>Удаление.</b> Удалённое попадает в Корзину (Папки → Корзина) и хранится там 30 дней, затем удаляется автоматически. До этого его можно восстановить; удалённое за последнюю неделю — в разделе «Недавно удалённые».</p>
+        <p><b>Жесты.</b> Удерживайте материал — быстрый просмотр; удерживайте и ведите — перенос в папку. В просмотре: щипок и двойное касание — приближение, потянуть вниз — закрыть. Смахивание от левого края — назад.</p>
         <p><b>Сохранность.</b> Регулярно делайте резервную копию: Настройки → Резервное копирование. Если удалить приложение или очистить данные браузера, материалы будут потеряны.</p>
       </div>
       <button className="btn ghost help-tips" onClick={() => { prefs.resetTips(); onClose(); }}>
@@ -234,6 +256,23 @@ export function SheetHost() {
   const close = ui.close;
 
   const runImport = async (files, type) => {
+    // Хватит ли места на устройстве.
+    const need = files.reduce((n, f) => n + f.size, 0);
+    const space = await freeSpace();
+    if (space && need > space.free - 50 * 1024 * 1024) {
+      ui.confirm({
+        title: 'Может не хватить места',
+        text: `Файлы занимают ${fmtSize(need)}, а свободно около ${fmtSize(space.free)}. Освободите место: очистите корзину или удалите лишнее.`,
+        okText: 'Всё равно добавить',
+        danger: false,
+        onOk: () => setTimeout(() => pickTarget(files, type), 50),
+      });
+      return;
+    }
+    pickTarget(files, type);
+  };
+
+  const pickTarget = (files, type) => {
     ui.pickFolder({
       title: 'Куда сохранить?',
       onPick: async (folderId) => {
@@ -393,6 +432,8 @@ export function SheetHost() {
     content = <FolderPicker title={s.title} onPick={s.onPick} onClose={close} />;
   } else if (s?.type === 'confirm') {
     content = <Confirm {...s} onClose={close} />;
+  } else if (s?.type === 'typeConfirm') {
+    content = <TypeConfirm {...s} onClose={close} />;
   } else if (s?.type === 'prompt') {
     content = <Prompt {...s} onClose={close} />;
   } else if (s?.type === 'recorder') {

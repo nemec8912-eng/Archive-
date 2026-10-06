@@ -21,8 +21,11 @@ import { LockScreen, PinScreen } from './screens/Lock.jsx';
 import Editor from './screens/Editor.jsx';
 import Duplicates from './screens/Duplicates.jsx';
 import StorageScreen from './screens/Storage.jsx';
+import Recent from './screens/Recent.jsx';
+import { ExportFolders, ImportFolders } from './screens/Transfer.jsx';
+import Housekeeping from './components/Housekeeping.jsx';
 
-const WITH_NAV = new Set(['home', 'folders', 'favorites', 'settings', 'collection', 'trash']);
+const WITH_NAV = new Set(['home', 'folders', 'favorites', 'settings', 'collection', 'trash', 'recent']);
 
 function Screen({ route }) {
   switch (route.name) {
@@ -43,6 +46,9 @@ function Screen({ route }) {
     case 'editor': return <Editor route={route} />;
     case 'duplicates': return <Duplicates />;
     case 'storage': return <StorageScreen />;
+    case 'recent': return <Recent />;
+    case 'export': return <ExportFolders />;
+    case 'import': return <ImportFolders route={route} />;
     default: return <Home />;
   }
 }
@@ -66,6 +72,7 @@ function Shell() {
       <SheetHost />
       <Toast />
       <Onboarding />
+      <Housekeeping />
     </div>
   );
 }

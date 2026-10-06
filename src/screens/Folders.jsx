@@ -34,6 +34,7 @@ export default function Folders() {
     .filter((f) => !f.hidden)
     .sort((a, b) => (sort === 'name' ? a.name.localeCompare(b.name, 'ru') : a.createdAt - b.createdAt));
   const trashCount = store.trashItems.length;
+  const recentCount = store.recentItems.length;
 
   const folderMenu = (f) =>
     ui.open({
@@ -83,6 +84,16 @@ export default function Folders() {
           />
         ))}
         {!folders.length && <p className="hint">Папок пока нет. Создайте папку через кнопку «+».</p>}
+        <div className="folder-row">
+          <button className="folder-main" onClick={() => nav.push({ name: 'recent' })}>
+            <span className="folder-icon trash"><Icon name="restore" size={22} /></span>
+            <span className="row-text">
+              <b>Недавно удалённые</b>
+              <span>{recentCount ? `${filesWord(recentCount)} за неделю` : 'Пусто'}</span>
+            </span>
+          </button>
+          <span className="icon-btn muted"><Icon name="chevron" size={20} /></span>
+        </div>
         <div className="folder-row">
           <button className="folder-main" onClick={() => nav.push({ name: 'trash' })}>
             <span className="folder-icon trash"><Icon name="trash" size={24} /></span>

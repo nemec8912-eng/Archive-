@@ -265,3 +265,15 @@ export async function saveToGallery(items) {
   files.forEach((f, i) => setTimeout(() => downloadBlob(f, f.name), i * 400));
   return files.length;
 }
+
+// Отдать файл пользователю: системное меню «Поделиться» (сохранить в Файлы, отправить себе) или скачивание.
+export async function offerFile(blob, name) {
+  const file = new File([blob], name, { type: blob.type || 'application/octet-stream' });
+  const native = window.Capacitor?.isNativePlatform?.() && window.ArchiveNative?.offerFile;
+  if (native) return window.ArchiveNative.offerFile(file);
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file], title: name }); return true; } catch (e) { if (e?.name === 'AbortError') return false; }
+  }
+  downloadBlob(file, name);
+  return true;
+}

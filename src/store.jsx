@@ -1,8 +1,12 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
-import { getMeta, setMeta, deleteBlobs, blobIdsOf, getBlob, saveBlob, uid } from './lib/db.js';
+import { getMeta, setMeta, deleteBlobs, blobIdsOf, getBlob, saveBlob, uid, clearBlobs } from './lib/db.js';
 import { DEFAULT_FOLDERS } from './lib/categories.js';
 
 const StoreCtx = createContext(null);
+export const TRASH_DAYS = 30; // материалы в корзине удаляются автоматически через 30 дней
+export const RECENT_DAYS = 7; // «Недавно удалённые» — за последнюю неделю
+const DAY = 86400000;
+export const daysLeft = (deletedAt, now = Date.now()) => Math.max(0, Math.ceil((deletedAt + TRASH_DAYS * DAY - now) / DAY));
 const EMPTY = { folders: [], items: [] };
 
 function seed() {
@@ -59,6 +63,24 @@ export function StoreProvider({ children }) {
       });
   }, []);
 
+  // Автоудаление из корзины: при запуске и раз в час.
+  useEffect(() => {
+    if (!ready) return undefined;
+    const sweep = () => {
+      const limit = Date.now() - TRASH_DAYS * DAY;
+      setState((s) => {
+        const old = s.items.filter((i) => i.deletedAt && i.deletedAt < limit);
+        if (!old.length) return s;
+        deleteBlobs(old.flatMap(blobIdsOf)).catch(() => {});
+        const gone = new Set(old.map((i) => i.id));
+        return { ...s, items: s.items.filter((i) => !gone.has(i.id)) };
+      });
+    };
+    sweep();
+    const t = setInterval(sweep, 3600_000);
+    return () => clearInterval(t);
+  }, [ready]);
+
   useEffect(() => {
     if (!ready) return;
     clearTimeout(saveTimer.current);
@@ -83,6 +105,7 @@ export function StoreProvider({ children }) {
       visible,
       byId,
       trashItems: state.items.filter((i) => i.deletedAt).sort((a, b) => b.deletedAt - a.deletedAt),
+      recentItems: state.items.filter((i) => i.deletedAt && i.deletedAt > Date.now() - RECENT_DAYS * DAY).sort((a, b) => b.deletedAt - a.deletedAt),
       folderById: (id) => state.folders.find((f) => f.id === id),
 
       addItems(list) {
@@ -182,6 +205,28 @@ export function StoreProvider({ children }) {
       },
       replaceAll(next) {
         setState(() => ({ folders: next.folders || [], items: next.items || [] }));
+      },
+      // Полный сброс: все материалы и папки удаляются, архив начинается заново.
+      async resetAll() {
+        await clearBlobs();
+        setState(() => seed());
+      },
+      // Добавление папок из файла экспорта; одинаковые имена получают номер.
+      importBundle(folders, items) {
+        setState((s) => {
+          const names = new Set(s.folders.map((f) => f.name));
+          const idMap = {};
+          const nf = folders.map((f) => {
+            let name = f.name;
+            for (let k = 2; names.has(name); k++) name = `${f.name} (${k})`;
+            names.add(name);
+            const id = uid();
+            idMap[f.id] = id;
+            return { ...f, id, name, createdAt: Date.now() };
+          });
+          const ni = items.map((it) => ({ ...it, id: uid(), folderId: idMap[it.folderId] || null, deletedAt: null, originFolderId: undefined }));
+          return { folders: [...s.folders, ...nf], items: [...ni, ...s.items] };
+        });
       },
     };
   }, [state, ready, mapItems]);

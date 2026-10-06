@@ -72,6 +72,32 @@ export default function Settings() {
         <Row icon="backup" label="Резервное копирование" onClick={() => nav.push({ name: 'backup' })} />
       </div>
 
+      <h4 className="set-group">Данные</h4>
+      <div className="set-card">
+        <Row icon="fileLock" label="Экспорт папок" onClick={() => nav.push({ name: 'export' })} />
+        <Row icon="upload" label="Импорт папок" onClick={() => nav.push({ name: 'import' })} />
+        <Row icon="restore" label="Недавно удалённые" value={store.recentItems.length || null} onClick={() => nav.push({ name: 'recent' })} />
+        <Row
+          icon="reset"
+          label="Сбросить архив"
+          danger
+          onClick={() =>
+            ui.open({
+              type: 'typeConfirm',
+              title: 'Сбросить архив?',
+              text: 'Все материалы, папки и корзина будут удалены с этого устройства без возможности восстановления. Сначала сделайте резервную копию, если она нужна.',
+              word: 'СБРОСИТЬ',
+              okText: 'Сбросить',
+              onOk: async () => {
+                await store.resetAll();
+                ui.showToast('Архив сброшен');
+                nav.goTab('home');
+              },
+            })
+          }
+        />
+      </div>
+
       <h4 className="set-group">Оформление</h4>
       <div className="set-card">
         <div className="set-row static">
@@ -145,9 +171,18 @@ export function HiddenFolders() {
 }
 
 // Резервная копия — файл на устройстве, который можно сохранить в надёжное место.
+const REMIND = [
+  { days: 7, label: 'Каждую неделю' },
+  { days: 14, label: 'Каждые 2 недели' },
+  { days: 30, label: 'Раз в месяц' },
+  { days: 0, label: 'Не напоминать' },
+];
+
 export function Backup() {
   const store = useStore();
   const ui = useUi();
+  const prefs = usePrefs();
+  const every = prefs.backupEvery ?? 14;
   const [busy, setBusy] = useState('');
   const input = useRef();
 
@@ -161,6 +196,7 @@ export function Backup() {
       } else {
         downloadBlob(file, name);
       }
+      prefs.set({ lastBackupAt: Date.now() });
       ui.showToast(`Копия создана: ${fmtSize(blob.size)}`);
     } catch {
       ui.showToast('Не удалось создать копию');
@@ -206,6 +242,23 @@ export function Backup() {
       <div className="set-card">
         <Row icon="download" label="Создать резервную копию" onClick={busy ? undefined : make} />
         <Row icon="upload" label="Восстановить из копии" onClick={busy ? undefined : () => input.current.click()} />
+      </div>
+      <div className="set-card gap-top">
+        <div className="set-row static">
+          <span className="set-icon"><Icon name="info" size={20} /></span>
+          <span className="set-label">Последняя копия</span>
+          <span className="set-value">{prefs.lastBackupAt ? fmtDate(prefs.lastBackupAt) : 'ещё не создавалась'}</span>
+        </div>
+        <Row
+          icon="bell"
+          label="Напоминать"
+          value={REMIND.find((r) => r.days === every)?.label}
+          onClick={() => ui.open({
+            type: 'menu',
+            title: 'Напоминание о резервной копии',
+            actions: REMIND.map((r) => ({ icon: r.days === every ? 'check' : 'bell', label: r.label, run: () => prefs.set({ backupEvery: r.days }) })),
+          })}
+        />
       </div>
       {busy && <p className="hint">{busy}</p>}
       <input ref={input} type="file" hidden onChange={pick} />
