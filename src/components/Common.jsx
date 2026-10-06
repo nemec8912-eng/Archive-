@@ -112,10 +112,10 @@ export function Thumb({ item, className = '' }) {
   );
 }
 
-export function Tile({ item, selecting, selected, onOpen, onLong }) {
-  const press = useLongPress(onLong, onOpen);
+export function Tile({ item, selecting, selected, onOpen, onLong, drag }) {
+  const press = useLongPress(onLong, onOpen, 450, drag);
   return (
-    <button className={`tile ${selected ? 'selected' : ''}`} {...press}>
+    <button className={`tile ${selected ? 'selected' : ''}`} data-id={item.id} {...press}>
       <Thumb item={item} />
       {item.favorite && !selecting && <span className="fav-dot"><Icon name="heartFill" size={12} /></span>}
       {selecting && <span className={`sel-mark ${selected ? 'on' : ''}`}>{selected && <Icon name="check" size={14} />}</span>}

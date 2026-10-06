@@ -18,6 +18,9 @@ import Search from './screens/Search.jsx';
 import Trash from './screens/Trash.jsx';
 import Settings, { HiddenFolders, Backup } from './screens/Settings.jsx';
 import { LockScreen, PinScreen } from './screens/Lock.jsx';
+import Editor from './screens/Editor.jsx';
+import Duplicates from './screens/Duplicates.jsx';
+import StorageScreen from './screens/Storage.jsx';
 
 const WITH_NAV = new Set(['home', 'folders', 'favorites', 'settings', 'collection', 'trash']);
 
@@ -37,6 +40,9 @@ function Screen({ route }) {
     case 'hidden': return <HiddenFolders />;
     case 'backup': return <Backup />;
     case 'pin': return <PinScreen route={route} />;
+    case 'editor': return <Editor route={route} />;
+    case 'duplicates': return <Duplicates />;
+    case 'storage': return <StorageScreen />;
     default: return <Home />;
   }
 }

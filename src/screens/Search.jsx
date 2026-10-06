@@ -11,6 +11,7 @@ const FILTERS = [{ type: 'all', title: 'Все' }, ...CATEGORIES];
 function haystack(item) {
   const parts = [item.name];
   if (item.text) parts.push(item.text);
+  if (item.caption) parts.push(item.caption);
   (item.messages || []).forEach((m) => m.text && parts.push(m.text));
   return parts.join(' ').toLowerCase();
 }

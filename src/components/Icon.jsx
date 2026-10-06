@@ -53,6 +53,13 @@ const P = {
   textSize: <><path d="M3 18 7.5 6h1L13 18M4.6 14h6.8" /><path d="M14.5 18l3-8h.6l3 8M15.5 15.5h4.8" /></>,
   grid: <><rect x="3.5" y="3.5" width="7" height="7" rx="1.5" /><rect x="13.5" y="3.5" width="7" height="7" rx="1.5" /><rect x="3.5" y="13.5" width="7" height="7" rx="1.5" /><rect x="13.5" y="13.5" width="7" height="7" rx="1.5" /></>,
   gridSmall: <><rect x="3" y="3" width="4.5" height="4.5" rx="1" /><rect x="9.75" y="3" width="4.5" height="4.5" rx="1" /><rect x="16.5" y="3" width="4.5" height="4.5" rx="1" /><rect x="3" y="9.75" width="4.5" height="4.5" rx="1" /><rect x="9.75" y="9.75" width="4.5" height="4.5" rx="1" /><rect x="16.5" y="9.75" width="4.5" height="4.5" rx="1" /><rect x="3" y="16.5" width="4.5" height="4.5" rx="1" /><rect x="9.75" y="16.5" width="4.5" height="4.5" rx="1" /><rect x="16.5" y="16.5" width="4.5" height="4.5" rx="1" /></>,
+  undo: <path d="M9 14 4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11" />,
+  crop: <path d="M6 2.5V16a2 2 0 0 0 2 2h13.5M2.5 6H16a2 2 0 0 1 2 2v13.5" />,
+  brush: <><path d="M9.5 14.5 19 5a2.1 2.1 0 0 1 3 3l-9.5 9.5" /><path d="M9.5 14.5c-2-.2-3.6 1-4 3-.3 1.4-1.2 2.3-2.5 2.5 2.6 1.6 7.3 1.5 8.8-1.5.5-1 .4-2.3-.3-3.2z" /></>,
+  caption: <><rect x="3" y="4.5" width="18" height="15" rx="2.5" /><path d="M7 10h10M7 14h6" /></>,
+  duplicate: <><rect x="8.5" y="8.5" width="12" height="12" rx="2" /><path d="M15.5 8.5V5A1.5 1.5 0 0 0 14 3.5H5A1.5 1.5 0 0 0 3.5 5v9A1.5 1.5 0 0 0 5 15.5h3.5" /><path d="M12 14.5h5M14.5 12v5" /></>,
+  pie: <><path d="M12 3a9 9 0 1 0 9 9h-9z" /><path d="M15 2.6A9 9 0 0 1 21.4 9H15z" /></>,
+  gallery: <><rect x="3" y="3" width="18" height="18" rx="2.5" /><path d="M12 7.5v8M8.5 12.5 12 16l3.5-3.5" /></>,
   rew: <><path d="M4 12a8 8 0 1 0 2.4-5.7M4 4.5v4h4" /><text x="12.4" y="15.2" fontSize="7" fontWeight="700" textAnchor="middle" fill="currentColor" stroke="none">10</text></>,
   fwd: <><path d="M20 12a8 8 0 1 1-2.4-5.7M20 4.5v4h-4" /><text x="11.6" y="15.2" fontSize="7" fontWeight="700" textAnchor="middle" fill="currentColor" stroke="none">10</text></>,
 };

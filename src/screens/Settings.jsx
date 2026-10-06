@@ -67,11 +67,7 @@ export default function Settings() {
 
       <h4 className="set-group">Хранилище</h4>
       <div className="set-card">
-        <div className="set-row static">
-          <span className="set-icon"><Icon name="storage" size={20} /></span>
-          <span className="set-label">Использовано</span>
-          <span className="set-value">{fmtSize(used)}{quota ? ` из ${fmtSize(quota)}` : ''}</span>
-        </div>
+        <Row icon="storage" label="Занятое место" value={`${fmtSize(used)}${quota ? ` из ${fmtSize(quota)}` : ''}`} onClick={() => nav.push({ name: 'storage' })} />
         <div className="storage-bar"><i style={{ width: `${pct}%` }} /></div>
         <Row icon="backup" label="Резервное копирование" onClick={() => nav.push({ name: 'backup' })} />
       </div>

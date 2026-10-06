@@ -6,7 +6,8 @@ import { useUi, useNav } from '../ui.jsx';
 import { useStore } from '../store.jsx';
 import { usePrefs } from '../prefs.jsx';
 import { haptic } from '../lib/haptics.js';
-import { importFile, audioExt, audioInfo } from '../lib/media.js';
+import { importFile, audioExt, audioInfo, imageInfo } from '../lib/media.js';
+import { parseChatFile, buildChatItem } from '../lib/chatImport.js';
 import { saveBlob, uid } from '../lib/db.js';
 import { fmtDur, fmtSize, fmtDate, filesWord, stamp } from '../lib/format.js';
 
@@ -165,7 +166,7 @@ function Confirm({ title, text, okText = 'Удалить', danger = true, onOk, 
   );
 }
 
-function Prompt({ title, value = '', placeholder, okText = 'Готово', onOk, onClose }) {
+function Prompt({ title, value = '', placeholder, okText = 'Готово', onOk, onClose, multiline = false, allowEmpty = false, maxLength = 120 }) {
   const [v, setV] = useState(value);
   const ref = useRef();
   useEffect(() => {
@@ -177,10 +178,14 @@ function Prompt({ title, value = '', placeholder, okText = 'Готово', onOk,
     <div className="dialog-layer" onClick={onClose}>
       <form className="dialog" onClick={(e) => e.stopPropagation()} onSubmit={submit}>
         <h3>{title}</h3>
-        <input ref={ref} className="field" value={v} placeholder={placeholder} onChange={(e) => setV(e.target.value)} maxLength={120} />
+        {multiline ? (
+          <textarea ref={ref} className="field area" value={v} placeholder={placeholder} onChange={(e) => setV(e.target.value)} maxLength={maxLength} rows={4} />
+        ) : (
+          <input ref={ref} className="field" value={v} placeholder={placeholder} onChange={(e) => setV(e.target.value)} maxLength={maxLength} />
+        )}
         <div className="dialog-actions">
           <button type="button" className="btn ghost" onClick={onClose}>Отмена</button>
-          <button type="submit" className="btn primary" disabled={!v.trim()}>{okText}</button>
+          <button type="submit" className="btn primary" disabled={!allowEmpty && !v.trim()}>{okText}</button>
         </div>
       </form>
     </div>
@@ -224,7 +229,7 @@ export function SheetHost() {
   const ui = useUi();
   const nav = useNav();
   const store = useStore();
-  const inputs = { photo: useRef(), video: useRef(), cameraPhoto: useRef(), cameraVideo: useRef(), screenshot: useRef() };
+  const inputs = { photo: useRef(), video: useRef(), cameraPhoto: useRef(), cameraVideo: useRef(), screenshot: useRef(), chat: useRef() };
   const s = ui.sheet;
   const close = ui.close;
 
@@ -241,10 +246,63 @@ export function SheetHost() {
             /* файл пропускается */
           }
         }
+        // Распознанные скриншоты из папки «Фото» переносим в папку «Скриншоты», если она есть.
+        const shots = list.filter((it) => it.type === 'screenshot' && type === 'photo');
+        const photoFolder = store.folderById(folderId);
+        const shotFolder = store.folders.find((f) => f.name === 'Скриншоты' && !f.hidden);
+        if (shots.length && photoFolder?.name === 'Фото' && shotFolder) shots.forEach((it) => { it.folderId = shotFolder.id; });
         store.addItems(list);
         haptic(list.length ? 'success' : 'error');
-        ui.showToast(list.length ? `Добавлено: ${filesWord(list.length)}` : 'Не удалось добавить файл');
+        ui.showToast(
+          !list.length ? 'Не удалось добавить файл'
+            : shots.length ? `Добавлено: ${filesWord(list.length)}, скриншотов: ${shots.length}`
+              : `Добавлено: ${filesWord(list.length)}`
+        );
       },
+    });
+  };
+
+  // Импорт переписки: разбор файла, выбор «кто вы», выбор папки.
+  const onChatFile = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    ui.showToast('Чтение переписки…', null, 0);
+    let parsed;
+    try {
+      parsed = await parseChatFile(file);
+    } catch (err) {
+      haptic('error');
+      ui.showToast(err?.message || 'Не удалось прочитать файл переписки', null, 4500);
+      return;
+    }
+    ui.hideToast();
+    const finish = (me) =>
+      ui.pickFolder({
+        title: 'Куда сохранить переписку?',
+        onPick: async (folderId) => {
+          try {
+            const item = await buildChatItem(parsed, me, folderId, {
+              saveBlob, imageInfo, audioInfo, uid,
+              onProgress: (i, n) => ui.showToast(`Импорт… ${Math.round((i / n) * 100)}%`, null, 0),
+            });
+            store.addItems([item]);
+            haptic('success');
+            ui.showToast(`Переписка сохранена: ${item.messages.length} сообщ.`);
+          } catch {
+            haptic('error');
+            ui.showToast('Не удалось сохранить переписку');
+          }
+        },
+      });
+    if (parsed.participants.length <= 1) { finish(null); return; }
+    ui.open({
+      type: 'menu',
+      title: 'Кто из участников — вы?',
+      actions: [
+        ...parsed.participants.slice(0, 12).map((name) => ({ icon: 'chat', label: name, run: () => finish(name) })),
+        { icon: 'close', label: 'Не указывать', run: () => finish(null) },
+      ],
     });
   };
 
@@ -289,6 +347,7 @@ export function SheetHost() {
     { icon: 'mic', label: 'Записать голосовое', run: () => ui.open({ type: 'recorder', onDone: saveVoice }) },
     { icon: 'note', label: 'Создать заметку', run: () => nav.push({ name: 'note', id: null }) },
     { icon: 'phone', label: 'Импортировать скриншот', run: () => inputs.screenshot.current.click() },
+    { icon: 'chat', label: 'Импортировать переписку', run: () => inputs.chat.current.click() },
     {
       icon: 'folderPlus',
       label: 'Создать папку',
@@ -351,6 +410,7 @@ export function SheetHost() {
         <input ref={inputs.cameraPhoto} type="file" accept="image/*" capture="environment" onChange={onFiles('photo')} />
         <input ref={inputs.cameraVideo} type="file" accept="video/*" capture="environment" onChange={onFiles('video')} />
         <input ref={inputs.screenshot} type="file" accept="image/*" multiple onChange={onFiles('screenshot')} />
+        <input ref={inputs.chat} type="file" accept=".txt,.zip,.json,.html,.htm,text/plain,application/zip,application/json,text/html" onChange={onChatFile} />
       </div>
     </>
   );

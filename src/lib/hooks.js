@@ -42,28 +42,57 @@ export function useInView(margin = '300px') {
 }
 
 // Короткое нажатие — onClick, удержание — onLong.
-export function useLongPress(onLong, onClick, ms = 450) {
+// drag (необязательно): после удержания движение пальца начинает перетаскивание.
+export function useLongPress(onLong, onClick, ms = 450, drag = null) {
   const timer = useRef();
   const fired = useRef(false);
+  const dragging = useRef(false);
   const start = useRef({ x: 0, y: 0 });
+  const unblock = useRef(null);
+  const release = () => { unblock.current?.(); unblock.current = null; };
   const clear = () => clearTimeout(timer.current);
+  // После удержания прокрутка страницы блокируется, чтобы палец мог тащить материал.
+  const blockScroll = () => {
+    const stop = (e) => e.preventDefault();
+    document.addEventListener('touchmove', stop, { passive: false });
+    unblock.current = () => document.removeEventListener('touchmove', stop);
+  };
   return {
     onPointerDown(e) {
       fired.current = false;
+      dragging.current = false;
       start.current = { x: e.clientX, y: e.clientY };
       clear();
+      if (drag && e.pointerType === 'mouse') { try { e.currentTarget.setPointerCapture(e.pointerId); } catch { /* */ } }
       timer.current = setTimeout(() => {
         fired.current = true;
         haptic('medium');
+        if (drag) blockScroll();
         onLong?.();
       }, ms);
     },
     onPointerMove(e) {
-      if (Math.abs(e.clientX - start.current.x) > 10 || Math.abs(e.clientY - start.current.y) > 10) clear();
+      const dx = e.clientX - start.current.x;
+      const dy = e.clientY - start.current.y;
+      if (dragging.current) { drag.onMove(e.clientX, e.clientY); return; }
+      if (fired.current && drag && Math.hypot(dx, dy) > 14) {
+        dragging.current = true;
+        drag.onStart(e.clientX, e.clientY);
+        return;
+      }
+      if (!fired.current && (Math.abs(dx) > 10 || Math.abs(dy) > 10)) clear();
     },
-    onPointerUp: clear,
-    onPointerCancel: clear,
-    onPointerLeave: clear,
+    onPointerUp(e) {
+      clear();
+      release();
+      if (dragging.current) { dragging.current = false; drag.onEnd(e.clientX, e.clientY); }
+    },
+    onPointerCancel() {
+      clear();
+      release();
+      if (dragging.current) { dragging.current = false; drag.onEnd(null, null); }
+    },
+    onPointerLeave() { if (!dragging.current && !(drag && fired.current)) clear(); },
     onContextMenu(e) { e.preventDefault(); },
     onClick(e) {
       if (fired.current) { e.preventDefault(); return; }

@@ -132,11 +132,14 @@ export async function importFile(file, type, folderId) {
     favorite: false,
     deletedAt: null,
   };
+  try { item.hash = await fileHash(file); } catch { /* необязательно */ }
   if (type === 'photo' || type === 'screenshot') {
     const info = await imageInfo(file);
     if (info.thumb) item.thumbId = await saveBlob(info.thumb);
     item.width = info.width;
     item.height = info.height;
+    // Скриншоты из галереи автоматически попадают в свою категорию.
+    if (type === 'photo' && looksLikeScreenshot(file, info)) item.type = 'screenshot';
   } else if (type === 'video') {
     const info = await videoInfo(file);
     if (info.thumb) item.thumbId = await saveBlob(info.thumb);
@@ -199,4 +202,66 @@ export async function shareItem(item) {
   } catch (e) {
     if (e?.name !== 'AbortError') throw e;
   }
+}
+
+// Отпечаток файла для поиска дубликатов. Большие файлы — по выборке начала, середины и конца.
+export async function fileHash(blob) {
+  if (!blob) return null;
+  const CH = 2 * 1024 * 1024;
+  let data;
+  if (blob.size <= CH * 4) {
+    data = await blob.arrayBuffer();
+  } else {
+    const mid = Math.floor(blob.size / 2);
+    const parts = await Promise.all([
+      blob.slice(0, CH).arrayBuffer(),
+      blob.slice(mid, mid + CH).arrayBuffer(),
+      blob.slice(blob.size - CH).arrayBuffer(),
+    ]);
+    data = await new Blob([String(blob.size), ...parts]).arrayBuffer();
+  }
+  const h = await crypto.subtle.digest('SHA-256', data);
+  return `${blob.size}:${[...new Uint8Array(h)].slice(0, 16).map((b) => b.toString(16).padStart(2, '0')).join('')}`;
+}
+
+// Распространённые ширины снимков экрана телефонов (в пикселях).
+const SCREEN_WIDTHS = new Set([640, 720, 750, 828, 1080, 1125, 1170, 1179, 1206, 1242, 1260, 1284, 1290, 1320, 1440, 1536, 1600, 1620, 1668, 1640, 2048]);
+
+// Похоже ли изображение на скриншот: по имени файла, размеру экрана этого устройства или пропорциям экрана телефона.
+export function looksLikeScreenshot(file, info = {}) {
+  const name = file.name || '';
+  if (/screen ?shot|скриншот|снимок экрана|screen_?capture|Скриншот/i.test(name)) return true;
+  const png = /png/i.test(file.type) || /\.png$/i.test(name);
+  if (!png || !info.width || !info.height) return false;
+  const w = Math.min(info.width, info.height);
+  const h = Math.max(info.width, info.height);
+  const dpr = window.devicePixelRatio || 1;
+  const sw = Math.round(Math.min(screen.width, screen.height) * dpr);
+  const sh = Math.round(Math.max(screen.width, screen.height) * dpr);
+  if (Math.abs(w - sw) <= 2 && Math.abs(h - sh) <= 2) return true;
+  const ratio = h / w;
+  return SCREEN_WIDTHS.has(w) && ratio > 1.7 && ratio < 2.4;
+}
+
+// Сохранить несколько материалов в галерею телефона (системное меню «Поделиться» → «Сохранить»).
+export async function saveToGallery(items) {
+  const files = [];
+  for (const it of items) {
+    if (!it.blobId) continue;
+    const blob = await getBlob(it.blobId);
+    if (blob) files.push(new File([blob], it.name, { type: it.mime || blob.type }));
+  }
+  if (!files.length) return 0;
+  const native = window.Capacitor?.isNativePlatform?.() && window.ArchiveNative?.saveToGallery;
+  if (native) return window.ArchiveNative.saveToGallery(files);
+  try {
+    if (navigator.canShare && navigator.canShare({ files })) {
+      await navigator.share({ files });
+      return files.length;
+    }
+  } catch (e) {
+    if (e?.name === 'AbortError') return 0;
+  }
+  files.forEach((f, i) => setTimeout(() => downloadBlob(f, f.name), i * 400));
+  return files.length;
 }

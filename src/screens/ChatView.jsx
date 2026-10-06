@@ -1,11 +1,13 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+
+const PAGE = 400; // длинные переписки показываются частями
 import Icon from '../components/Icon.jsx';
 import { TopBar } from '../components/Common.jsx';
 import { useStore } from '../store.jsx';
 import { useNav, Fixed } from '../ui.jsx';
 import { useActions } from '../actions.js';
 import { useBlobUrl } from '../lib/hooks.js';
-import { fmtDate, fmtTime, fmtDur } from '../lib/format.js';
+import { fmtDate, fmtTime, fmtDur, dayKey, dayLabel } from '../lib/format.js';
 import { useAudio, Waveform } from './VoicePlayer.jsx';
 
 export function VoiceBubble({ blobId, duration, waveform }) {
@@ -36,6 +38,7 @@ export default function ChatView({ route }) {
   const nav = useNav();
   const act = useActions();
   const item = store.byId[route.id];
+  const [shown, setShown] = useState(PAGE);
 
   useEffect(() => {
     if (!item || item.deletedAt) nav.back();
@@ -45,15 +48,25 @@ export default function ChatView({ route }) {
 
   return (
     <div className="screen chat-screen">
-      <TopBar title={item.name} sub={fmtDate(item.createdAt)} />
+      <TopBar title={item.name} sub={fmtDate(item.chatStart || item.createdAt)} />
       <div className="chat">
-        {(item.messages || []).map((m) => (
-          <div key={m.id} className={`bubble ${m.from === 'me' ? 'me' : 'them'} ${m.kind !== 'text' ? 'media' : ''}`}>
+        {(item.messages || []).length > shown && (
+          <button className="btn ghost chat-more" onClick={() => setShown((n) => n + PAGE)}>
+            Показать более ранние ({(item.messages || []).length - shown})
+          </button>
+        )}
+        {(item.messages || []).slice(-shown).map((m, i, all) => (
+          <React.Fragment key={m.id}>
+          {m.time && (i === 0 || !all[i - 1].time || dayKey(all[i - 1].time) !== dayKey(m.time)) && (
+            <div className="chat-day">{dayLabel(m.time)}</div>
+          )}
+          <div className={`bubble ${m.from === 'me' ? 'me' : 'them'} ${m.kind !== 'text' ? 'media' : ''}`}>
             {m.kind === 'text' && <p>{m.text}</p>}
             {(m.kind === 'photo' || m.kind === 'video') && <MediaBubble m={m} />}
             {m.kind === 'voice' && <VoiceBubble blobId={m.blobId} duration={m.duration} waveform={m.waveform} />}
             {m.time && <time>{fmtTime(m.time)}</time>}
           </div>
+          </React.Fragment>
         ))}
         {!(item.messages || []).length && <p className="hint">Переписка пустая</p>}
       </div>

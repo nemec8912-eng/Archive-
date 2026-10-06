@@ -1,7 +1,7 @@
 import { useStore } from './store.jsx';
 import { useNav, useUi } from './ui.jsx';
 import { VISUAL } from './lib/categories.js';
-import { shareItem } from './lib/media.js';
+import { shareItem, saveToGallery } from './lib/media.js';
 import { haptic } from './lib/haptics.js';
 
 // Общая логика действий с материалами (ТЗ, п. 15).
@@ -62,6 +62,35 @@ export function useActions() {
       },
     });
 
+  const caption = (item) =>
+    ui.prompt({
+      title: 'Подпись',
+      value: item.caption || '',
+      placeholder: 'Например: где и когда снято',
+      okText: 'Сохранить',
+      multiline: true,
+      allowEmpty: true,
+      maxLength: 500,
+      onOk: (text) => {
+        store.updateItem(item.id, { caption: text.trim() || undefined });
+        ui.showToast(text.trim() ? 'Подпись сохранена' : 'Подпись удалена');
+      },
+    });
+
+  const edit = (item) => nav.push({ name: 'editor', id: item.id });
+
+  const saveGallery = async (ids) => {
+    const list = ids.map((id) => store.byId[id]).filter((i) => i && i.blobId);
+    if (!list.length) { ui.showToast('Нечего сохранять: выберите фото, видео или голосовые'); return; }
+    ui.showToast('Подготовка…', null, 0);
+    try {
+      const n = await saveToGallery(list);
+      if (n) { haptic('success'); ui.showToast(`Готово: ${n}`); } else ui.hideToast();
+    } catch {
+      ui.showToast('Не удалось сохранить');
+    }
+  };
+
   const toggleFav = (ids, value) => {
     haptic(value ? 'success' : 'light');
     store.setFavorite(ids, value);
@@ -73,7 +102,9 @@ export function useActions() {
 
   const itemActions = (item, { list, inViewer = false, onDeleted } = {}) => [
     !inViewer && { icon: 'open', label: 'Открыть', run: () => open(item, list) },
+    VISUAL.has(item.type) && { icon: 'crop', label: item.type === 'video' ? 'Обрезать' : 'Редактировать', run: () => edit(item) },
     { icon: 'pencil', label: 'Переименовать', run: () => rename(item) },
+    { icon: 'caption', label: item.caption ? 'Изменить подпись' : 'Подпись', run: () => caption(item) },
     { icon: 'folderMove', label: 'Переместить', run: () => move([item.id]) },
     { icon: 'copy', label: 'Копировать', run: () => copy([item.id]) },
     {
@@ -108,5 +139,5 @@ export function useActions() {
     { icon: 'trash', label: 'Удалить', tone: 'danger', run: () => remove([item.id]) },
   ];
 
-  return { open, menu, peek, swipe, itemActions, remove, rename, move, copy, toggleFav, share };
+  return { open, menu, peek, swipe, itemActions, caption, edit, saveGallery, remove, rename, move, copy, toggleFav, share };
 }
