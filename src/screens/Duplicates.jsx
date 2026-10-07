@@ -19,7 +19,7 @@ export default function Duplicates() {
   const [sel, setSel] = useState(() => new Set());
   const [touched, setTouched] = useState(false);
 
-  const candidates = store.items.filter((i) => !i.deletedAt && i.blobId);
+  const candidates = useMemo(() => store.items.filter((i) => !i.deletedAt && i.blobId), [store.items]);
 
   // Досчитываем отпечатки для старых материалов.
   useEffect(() => {
@@ -27,14 +27,19 @@ export default function Duplicates() {
     if (!missing.length) return undefined;
     let alive = true;
     (async () => {
+      // Отпечатки сохраняются пачками — на большом архиве не перерисовываем всё после каждого файла.
+      let batch = {};
+      const flush = () => { if (Object.keys(batch).length && alive) store.patchItems(batch); batch = {}; };
       for (let k = 0; k < missing.length && alive; k++) {
-        setProgress({ done: k, total: missing.length });
+        if (k % 10 === 0) setProgress({ done: k, total: missing.length });
         try {
           const b = await getBlob(missing[k].blobId);
           const h = await fileHash(b);
-          if (h && alive) store.updateItem(missing[k].id, { hash: h });
+          if (h) batch[missing[k].id] = { hash: h };
         } catch { /* пропускаем */ }
+        if (k % 25 === 24) flush();
       }
+      flush();
       if (alive) setProgress(null);
     })();
     return () => { alive = false; };

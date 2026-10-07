@@ -47,6 +47,43 @@ async function sweepTemp() {
   } catch { /* папки ещё нет */ }
 }
 
+// Большой файл (резервная копия, экспорт папок) пишется прямо во временный файл по частям.
+function tempSink(name) {
+  const path = `${TEMP}/${Date.now()}-${name.replace(/[\\/:*?"<>|]/g, '_')}`;
+  let started = false;
+  let uri = null;
+  let size = 0;
+  const put = async (u8) => {
+    const data = toB64(u8);
+    if (!started) { uri = (await Filesystem.writeFile({ path, data, directory: Directory.Cache, recursive: true })).uri; started = true; }
+    else await Filesystem.appendFile({ path, data, directory: Directory.Cache });
+  };
+  return {
+    async write(part) {
+      const blob = part instanceof Blob ? part : new Blob([part]);
+      for (let off = 0; off < blob.size; off += CHUNK) await put(new Uint8Array(await blob.slice(off, off + CHUNK).arrayBuffer()));
+      if (!blob.size && !started) await put(new Uint8Array(0));
+      size += blob.size;
+    },
+    async finish() {
+      if (!started) await put(new Uint8Array(0));
+      return { nativeFile: true, uri, path, name, size };
+    },
+    get size() { return size; },
+  };
+}
+
+async function shareTemp(res) {
+  markExternal();
+  try {
+    await Share.share({ files: [res.uri], dialogTitle: 'Сохранить или отправить' });
+    return true;
+  } catch (e) {
+    if (/cancel/i.test(e?.message || '')) return false;
+    throw e;
+  }
+}
+
 // Системное меню «Поделиться» (там же «Сохранить в Файлы», «Сохранить изображение»).
 async function shareFiles(files) {
   markExternal();
@@ -128,6 +165,8 @@ export function initNative() {
     shareFiles,
     shareText: (title, text) => { markExternal(); return Share.share({ title, text }).catch(() => {}); },
     offerFile: (file) => shareFiles([file]).then((n) => n > 0),
+    tempSink: (name) => { sweepTemp(); return tempSink(name); },
+    shareTemp,
     biometric: NativeBiometric,
     // Скрытие в переключателе приложений; на Android заодно запрещает снимки экрана.
     setPrivacy(on) {

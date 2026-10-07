@@ -8,11 +8,12 @@ import { useSecurity, AUTOLOCK } from '../security.jsx';
 import { biometricAvailable } from '../lib/vault.js';
 import { usePrefs, ACCENTS } from '../prefs.jsx';
 import { haptic } from '../lib/haptics.js';
-import { createBackup, readBackup, restoreBackup } from '../lib/backup.js';
+import { createBackup, readBackup, restoreBackup, backupName } from '../lib/backup.js';
+import { fileSink } from '../lib/sink.js';
 import { offerFile } from '../lib/media.js';
 import { fmtSize, fmtDate, filesWord } from '../lib/format.js';
 
-const VERSION = '1.3.0';
+const VERSION = '1.4.0';
 
 function Row({ icon, label, value, onClick, children, danger }) {
   return (
@@ -241,10 +242,14 @@ export function Backup() {
   const make = async () => {
     setBusy('Создание копии…');
     try {
-      const { blob, name } = await createBackup(store.state);
-      await offerFile(blob, name);
+      const { file, name, size } = await createBackup(store.state, {
+        sink: fileSink(backupName(), 'application/octet-stream'),
+        onProgress: (n, m) => setBusy(`Создание копии… ${n} из ${m}`),
+      });
+      setBusy('');
+      await offerFile(file, name);
       prefs.set({ lastBackupAt: Date.now() });
-      ui.showToast(`Копия создана: ${fmtSize(blob.size)}`);
+      ui.showToast(`Копия создана: ${fmtSize(size)}`);
     } catch {
       ui.showToast('Не удалось создать копию');
     }

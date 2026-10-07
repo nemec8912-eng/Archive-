@@ -115,3 +115,15 @@ test('список, удаление, очистка и уборка време�
 test('повреждённый файл распознаётся', async () => {
   await assert.rejects(readHeader(new Blob(['мусор, а не файл архива'])), /повреждён/);
 });
+
+test('заголовок читается без чтения всего файла', async () => {
+  const fs = memFs();
+  const st = createFileBlobStore(fs);
+  await st.write('big', randomBlob(3 * 1024 * 1024, 'video/mp4'), await key());
+  const before = fs.reads || 0;
+  const h = await st.info('big');
+  assert.equal(h.size, 3 * 1024 * 1024);
+  assert.equal(h.type, 'video/mp4');
+  assert.equal(fs.reads || 0, before);
+  assert.equal(await st.info('нет'), null);
+});

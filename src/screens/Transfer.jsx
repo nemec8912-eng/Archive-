@@ -3,7 +3,8 @@ import Icon from '../components/Icon.jsx';
 import { TopBar, Toggle } from '../components/Common.jsx';
 import { useStore } from '../store.jsx';
 import { useNav, useUi } from '../ui.jsx';
-import { getBlob, saveBlob, blobIdsOf } from '../lib/db.js';
+import { getBlob, saveBlob, blobIdsOf, blobInfo } from '../lib/db.js';
+import { fileSink } from '../lib/sink.js';
 import { packBox, openBox, isBox } from '../lib/cryptoBox.js';
 import { offerFile } from '../lib/media.js';
 import { fmtSize, filesWord, fmtDate, fmtDay } from '../lib/format.js';
@@ -72,18 +73,22 @@ export function ExportFolders() {
     setBusy('Шифрование…');
     try {
       const ids = [...new Set(items.flatMap(blobIdsOf))];
-      const blobs = [];
+      const entries = [];
       for (const id of ids) {
-        const b = await getBlob(id);
-        if (b) blobs.push({ id, blob: b });
+        const info = await blobInfo(id);
+        if (info) entries.push({ id, ...info });
       }
-      const box = await packBox(pass.a, { magic: 'archive-folders', version: 1, createdAt: Date.now(), folders: chosen, items }, blobs,
-        (n, m) => setBusy(`Шифрование… ${n} из ${m}`));
       const name = `archive-folders-${fmtDay(Date.now()).split('.').reverse().join('-')}.archivebox`;
+      const sink = fileSink(name, 'application/octet-stream');
+      const box = await packBox(pass.a, { magic: 'archive-folders', version: 1, createdAt: Date.now(), folders: chosen, items }, entries, {
+        read: getBlob,
+        sink,
+        onProgress: (n, m) => setBusy(`Шифрование… ${n} из ${m}`),
+      });
       setBusy('');
       await offerFile(box, name);
       haptic('success');
-      ui.showToast(`Файл создан: ${fmtSize(box.size)}`);
+      ui.showToast(`Файл создан: ${fmtSize(sink.size)}`);
       nav.back();
     } catch {
       setBusy('');

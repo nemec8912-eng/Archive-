@@ -157,6 +157,17 @@ export async function blobKeys() {
 }
 export const usesFileStorage = () => !!FILES;
 
+// Размер и тип файла без чтения содержимого (для оглавления резервной копии и экспорта).
+export async function blobInfo(id) {
+  if (FILES) {
+    const h = await FILES.info(id).catch(() => null);
+    if (h) return { size: h.size, type: h.type };
+  }
+  const v = await rawGet('blobs', id);
+  if (!v) return null;
+  return { size: v.size, type: v.type || '' };
+}
+
 // Фоновый перенос файлов из базы в папку приложения. Ключ не нужен: зашифрованные записи
 // переносятся как есть. Если приложение закроют посередине, перенос продолжится при следующем запуске.
 export function migrateBlobsToFiles(onProgress) {

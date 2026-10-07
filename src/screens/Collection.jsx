@@ -8,6 +8,7 @@ import { useActions } from '../actions.js';
 import { CATEGORIES, CATEGORY, VISUAL } from '../lib/categories.js';
 import { filesWord, groupByDay } from '../lib/format.js';
 import { usePrefs } from '../prefs.jsx';
+import { useProgressive } from '../lib/hooks.js';
 
 const COLS = [2, 3, 4, 5];
 const TYPE_ORDER = Object.fromEntries(CATEGORIES.map((c, i) => [c.type, i]));
@@ -136,7 +137,11 @@ export default function Collection({ route }) {
     });
   };
   const endSelect = () => { setSelecting(false); setSel(new Set()); };
-  const ids = [...sel].filter((id) => items.some((i) => i.id === id));
+  const itemIds = useMemo(() => new Set(items.map((i) => i.id)), [items]);
+  const ids = [...sel].filter((id) => itemIds.has(id));
+  // Большие папки рисуются частями по мере прокрутки.
+  const [shown, moreRef] = useProgressive(items.length, 120, `${sortKey}:${sort.id}`);
+  const visibleItems = shown < items.length ? items.slice(0, shown) : items;
   const allSelected = items.length > 0 && ids.length === items.length;
   const selectAll = () => { haptic('selection'); setSel(allSelected ? new Set() : new Set(items.map((i) => i.id))); };
   const allFav = ids.length > 0 && ids.every((id) => store.byId[id]?.favorite);
@@ -241,20 +246,22 @@ export default function Collection({ route }) {
               }}
               onTouchEnd={() => { pinch.current = null; }}
             >
-              {byDate ? groupByDay(items).map((grp) => (
+              {byDate ? groupByDay(visibleItems).map((grp) => (
                 <section key={grp.key} className="day-group">
                   <h4 className="day-head">{grp.label}</h4>
                   <div className="grid" style={{ '--cols': cols }}>{grp.items.map(tile)}</div>
                 </section>
               )) : (
-                <div className="grid" style={{ '--cols': cols }}>{items.map(tile)}</div>
+                <div className="grid" style={{ '--cols': cols }}>{visibleItems.map(tile)}</div>
               )}
+              {shown < items.length && <div ref={moreRef} className="list-more" aria-hidden="true" />}
             </div>
           ) : (
             <div className="list">
-              {items.map((it) => (
+              {visibleItems.map((it) => (
                 <ItemRow key={it.id} item={it} selecting={selecting} selected={sel.has(it.id)} onOpen={() => onOpen(it)} onLong={() => onLong(it)} swipe={act.swipe(it)} />
               ))}
+              {shown < items.length && <div ref={moreRef} className="list-more" aria-hidden="true" />}
             </div>
           )}
         </>

@@ -279,6 +279,7 @@ export async function saveToGallery(items) {
 
 // Отдать файл пользователю: системное меню «Поделиться» (сохранить в Файлы, отправить себе) или скачивание.
 export async function offerFile(blob, name) {
+  if (blob?.nativeFile) return window.ArchiveNative.shareTemp(blob); // уже лежит во временном файле (см. sink.js)
   const file = new File([blob], name, { type: blob.type || 'application/octet-stream' });
   markExternal();
   if (window.ArchiveNative) return window.ArchiveNative.offerFile(file);

@@ -33,6 +33,35 @@ export const nativeFs = {
     const r = await Filesystem.readFile({ path, directory: D });
     return typeof r.data === 'string' ? new Blob([fromB64(r.data)]) : r.data;
   },
+  // Первые n байт файла: поток читается до нужного места и обрывается — большое видео целиком не грузится.
+  async head(path, n) {
+    let uri;
+    try {
+      await Filesystem.stat({ path, directory: D });
+      ({ uri } = await Filesystem.getUri({ path, directory: D }));
+    } catch (e) {
+      if (missing(e)) return null;
+      throw e;
+    }
+    try {
+      const res = await fetch(Capacitor.convertFileSrc(uri), { headers: { Range: `bytes=0-${n - 1}` } });
+      if (res.ok && res.body) {
+        const reader = res.body.getReader();
+        const chunks = [];
+        let got = 0;
+        while (got < n) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          chunks.push(value);
+          got += value.length;
+        }
+        reader.cancel().catch(() => {});
+        return new Blob(chunks).slice(0, n);
+      }
+    } catch { /* ниже — чтение целиком */ }
+    const all = await this.read(path);
+    return all && all.slice(0, n);
+  },
   async remove(path) {
     try { await Filesystem.deleteFile({ path, directory: D }); } catch (e) { if (!missing(e)) throw e; }
   },

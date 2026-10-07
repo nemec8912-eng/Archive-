@@ -1,14 +1,23 @@
-import React, { useMemo, useState } from 'react';
+import React, { useDeferredValue, useMemo, useState } from 'react';
 import Icon from '../components/Icon.jsx';
 import { ItemRow, Empty } from '../components/Common.jsx';
 import { useStore } from '../store.jsx';
 import { useNav } from '../ui.jsx';
 import { useActions } from '../actions.js';
 import { CATEGORIES } from '../lib/categories.js';
+import { useProgressive } from '../lib/hooks.js';
 
 const FILTERS = [{ type: 'all', title: 'Все' }, ...CATEGORIES];
 
+// Текст для поиска считается один раз на материал (материалы в архиве не меняются на месте —
+// при правке появляется новый объект, и текст пересчитывается).
+const hayCache = new WeakMap();
 function haystack(item) {
+  let h = hayCache.get(item);
+  if (h == null) { h = buildHaystack(item); hayCache.set(item, h); }
+  return h;
+}
+function buildHaystack(item) {
   const parts = [item.name];
   if (item.text) parts.push(item.text);
   if (item.caption) parts.push(item.caption);
@@ -24,8 +33,10 @@ export default function Search() {
   const [q, setQ] = useState('');
   const [filter, setFilter] = useState('all');
 
+  // Пока печатают, список обновляется с небольшой задержкой — клавиатура не подтормаживает.
+  const query = useDeferredValue(q);
   const results = useMemo(() => {
-    const words = q.toLowerCase().trim().split(/\s+/).filter(Boolean);
+    const words = query.toLowerCase().trim().split(/\s+/).filter(Boolean);
     return store.visible
       .filter((i) => filter === 'all' || i.type === filter)
       .filter((i) => {
@@ -34,7 +45,8 @@ export default function Search() {
         return words.every((w) => h.includes(w));
       })
       .sort((a, b) => b.createdAt - a.createdAt);
-  }, [store.visible, q, filter]);
+  }, [store.visible, query, filter]);
+  const [shown, moreRef] = useProgressive(results.length, 80, `${query}|${filter}`);
 
   return (
     <div className="screen search-screen">
@@ -53,9 +65,10 @@ export default function Search() {
       </div>
       {results.length ? (
         <div className="list">
-          {results.map((it) => (
+          {results.slice(0, shown).map((it) => (
             <ItemRow key={it.id} item={it} onOpen={() => act.open(it, results)} onLong={() => act.peek(it, { list: results })} swipe={act.swipe(it)} />
           ))}
+          {shown < results.length && <div ref={moreRef} className="list-more" aria-hidden="true" />}
         </div>
       ) : (
         <Empty icon="search" title="Ничего не найдено" text={q ? 'Попробуйте изменить запрос или фильтр.' : 'В этой категории пока нет материалов.'} />

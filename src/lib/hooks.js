@@ -2,37 +2,88 @@ import { useEffect, useRef, useState } from 'react';
 import { getBlob } from './db.js';
 import { haptic } from './haptics.js';
 
+// Кэш миниатюр: id → { url, users }. Порядок в Map — от давно использованных к недавним.
+// На большом архиве хранится не больше THUMB_LIMIT ссылок: лишние, которые сейчас нигде не показаны, освобождаются.
 const thumbCache = new Map();
+const THUMB_LIMIT = 400;
 let generation = 0;
 
 // При блокировке временные ссылки на расшифрованные миниатюры уничтожаются.
 export function clearThumbCache() {
-  thumbCache.forEach((u) => URL.revokeObjectURL(u));
+  thumbCache.forEach((e) => URL.revokeObjectURL(e.url));
   thumbCache.clear();
   generation += 1;
 }
 
+function takeThumb(id) {
+  const e = thumbCache.get(id);
+  if (!e) return null;
+  thumbCache.delete(id);
+  thumbCache.set(id, e); // в конец — недавно использована
+  e.users += 1;
+  return e.url;
+}
+
+function releaseThumb(id) {
+  const e = thumbCache.get(id);
+  if (e) e.users = Math.max(0, e.users - 1);
+  if (thumbCache.size <= THUMB_LIMIT) return;
+  for (const [k, v] of thumbCache) {
+    if (thumbCache.size <= THUMB_LIMIT) break;
+    if (v.users === 0) { URL.revokeObjectURL(v.url); thumbCache.delete(k); }
+  }
+}
+
 // Возвращает временную ссылку на файл из хранилища устройства.
 export function useBlobUrl(id, { cache = false, enabled = true } = {}) {
-  const [url, setUrl] = useState(() => (id && cache ? thumbCache.get(id) : null) || null);
+  const [url, setUrl] = useState(() => (id && cache ? thumbCache.get(id)?.url : null) || null);
   useEffect(() => {
     if (!id || !enabled) { setUrl(null); return undefined; }
-    if (cache && thumbCache.has(id)) { setUrl(thumbCache.get(id)); return undefined; }
+    if (cache) {
+      const hit = takeThumb(id);
+      if (hit) { setUrl(hit); return () => releaseThumb(id); }
+    }
     let alive = true;
     let made;
+    let held = false;
     const gen = generation;
     getBlob(id).then((b) => {
       if (!b || !alive || gen !== generation) return;
-      made = URL.createObjectURL(b);
-      if (cache) thumbCache.set(id, made);
+      if (cache) {
+        const hit = takeThumb(id); // пока читали, ту же миниатюру мог загрузить соседний экран
+        if (hit) { held = true; setUrl(hit); return; }
+        made = URL.createObjectURL(b);
+        thumbCache.set(id, { url: made, users: 1 });
+        held = true;
+      } else {
+        made = URL.createObjectURL(b);
+      }
       setUrl(made);
     }).catch(() => {});
     return () => {
       alive = false;
-      if (made && !cache) URL.revokeObjectURL(made);
+      if (cache) { if (held) releaseThumb(id); } else if (made) URL.revokeObjectURL(made);
     };
   }, [id, cache, enabled]);
   return url;
+}
+
+// Длинные списки рисуются частями: сначала первые step, остальное — по мере прокрутки.
+// Возвращает [сколько показать, ref для отметки в конце списка].
+export function useProgressive(total, step = 120, resetKey = '') {
+  const [count, setCount] = useState(step);
+  const ref = useRef(null);
+  useEffect(() => { setCount(step); }, [resetKey, step]);
+  useEffect(() => {
+    if (count >= total || !ref.current) return undefined;
+    if (!('IntersectionObserver' in window)) { setCount(total); return undefined; }
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) setCount((c) => Math.min(total, c + step));
+    }, { rootMargin: '1200px' });
+    io.observe(ref.current);
+    return () => io.disconnect();
+  }, [count, total, step]);
+  return [Math.min(count, total), ref];
 }
 
 export function useInView(margin = '300px') {

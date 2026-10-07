@@ -1,4 +1,5 @@
 // Шифрование на устройстве: AES-GCM 256, ключ из пароля через PBKDF2-SHA-256.
+import { memorySink } from './sink.js';
 export const PBKDF2_ITER = 310000;
 const enc = new TextEncoder();
 const dec = new TextDecoder();
@@ -41,27 +42,39 @@ export const fromB64 = (b64) => Uint8Array.from(atob(b64), (c) => c.charCodeAt(0
 const MAGIC = 'ARCHBOX1';
 const PART = 8 * 1024 * 1024; // файлы шифруются частями, чтобы не держать большие видео в памяти целиком
 
-export async function packBox(password, payload, blobs, onProgress) {
+// entries — [{ id, type, size }], read(id) → Blob. Заголовок со всеми iv и длинами частей считается заранее,
+// поэтому файлы шифруются и пишутся по одному, не собираясь в памяти.
+export async function packBox(password, payload, entries, { read, sink = memorySink(), onProgress } = {}) {
   const salt = randomBytes(16);
   const key = await deriveKey(password, salt);
-  const parts = [];
-  const index = [];
-  let n = 0;
-  for (const { id, blob } of blobs) {
-    const entry = { id, type: blob.type, size: blob.size, parts: [] };
-    for (let off = 0; off < blob.size || (off === 0 && blob.size === 0); off += PART) {
-      const { iv, ct } = await encryptBytes(key, await blob.slice(off, off + PART).arrayBuffer());
-      entry.parts.push({ iv: toB64(iv), len: ct.length });
-      parts.push(ct);
-      if (blob.size === 0) break;
+  const ivs = [];
+  const index = entries.map((e) => {
+    const n = Math.max(1, Math.ceil(e.size / PART));
+    const parts = [];
+    for (let i = 0; i < n; i++) {
+      const iv = randomBytes(12);
+      ivs.push(iv);
+      parts.push({ iv: toB64(iv), len: Math.min(PART, e.size - i * PART) + 16 });
     }
-    index.push(entry);
-    onProgress?.(++n, blobs.length);
-  }
+    return { id: e.id, type: e.type || '', size: e.size, parts };
+  });
   const head = await encryptJson(key, { ...payload, blobs: index });
   const len = new Uint8Array(4);
   new DataView(len.buffer).setUint32(0, head.iv.length + head.ct.length, true);
-  return new Blob([enc.encode(MAGIC), salt, len, head.iv, head.ct, ...parts], { type: 'application/octet-stream' });
+  await sink.write(new Blob([enc.encode(MAGIC), salt, len, head.iv, head.ct]));
+  let k = 0;
+  for (let n = 0; n < index.length; n++) {
+    const e = index[n];
+    const blob = await read(e.id);
+    if (!blob || blob.size !== e.size) throw new Error('Файл изменился во время экспорта');
+    for (let i = 0; i < e.parts.length; i++) {
+      const plain = await blob.slice(i * PART, (i + 1) * PART).arrayBuffer();
+      const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv: ivs[k++] }, key, plain));
+      await sink.write(ct);
+    }
+    onProgress?.(n + 1, index.length);
+  }
+  return sink.finish();
 }
 
 export async function isBox(file) {

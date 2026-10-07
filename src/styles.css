@@ -605,3 +605,6 @@ body.dragging { user-select: none; -webkit-user-select: none; overflow: hidden; 
 .menu-item.static { cursor: default; }
 .key.ghost svg { color: var(--accent-text); }
 .toast { width: max-content; }
+
+/* Отметка в конце длинного списка: когда она близко, дорисовывается следующая часть. */
+.list-more { height: 1px; }

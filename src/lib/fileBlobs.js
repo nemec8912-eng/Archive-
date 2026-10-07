@@ -80,7 +80,8 @@ async function decryptParts(blob, h, key) {
   return new Blob(chunks, { type: h.type });
 }
 
-// fs: { write(path, u8), append(path, u8), read(path) → Blob|null, remove(path), rename(from, to), list(dir) → [имена], clear(dir) }
+// fs: { write(path, u8), append(path, u8), read(path) → Blob|null, head?(path, n) → Blob|null (первые n байт),
+//      remove(path), rename(from, to), list(dir) → [имена], clear(dir) }
 export function createFileBlobStore(fs, dir = 'archive-blobs') {
   const pathOf = (id) => `${dir}/${id}`;
   const tmpOf = (id) => `${dir}/${id}.tmp`;
@@ -124,7 +125,13 @@ export function createFileBlobStore(fs, dir = 'archive-blobs') {
   }
 
   return {
+    // Только заголовок: тип, размер, зашифрован ли. Если адаптер умеет читать начало файла — сам файл не читается.
     async info(id) {
+      if (fs.head) {
+        const start = await fs.head(pathOf(id), 64 * 1024);
+        if (!start) return null;
+        try { return await readHeader(start); } catch { /* заголовок длиннее — читаем целиком */ }
+      }
       const b = await fs.read(pathOf(id));
       return b ? readHeader(b) : null;
     },

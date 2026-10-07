@@ -11,7 +11,8 @@ export function memFs({ failAppendAt = 0 } = {}) {
       if (!files.has(path)) throw new Error('File does not exist');
       files.get(path).push(new Uint8Array(u8));
     },
-    async read(path) { return files.has(path) ? new Blob(files.get(path)) : null; },
+    async read(path) { fs.reads = (fs.reads || 0) + 1; return files.has(path) ? new Blob(files.get(path)) : null; },
+    async head(path, n) { return files.has(path) ? new Blob(files.get(path)).slice(0, n) : null; },
     async remove(path) { files.delete(path); },
     async rename(from, to) {
       if (!files.has(from)) throw new Error('File does not exist');

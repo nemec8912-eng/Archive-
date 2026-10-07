@@ -142,6 +142,10 @@ export function StoreProvider({ children }) {
       updateItem(id, patch) {
         mapItems([id], (it) => ({ ...it, ...patch }));
       },
+      // Несколько правок разом: { id: { поле: значение } }.
+      patchItems(patches) {
+        mapItems(Object.keys(patches), (it) => ({ ...it, ...patches[it.id] }));
+      },
       rename(id, name) {
         mapItems([id], (it) => ({ ...it, name }));
       },

@@ -71,7 +71,7 @@ GitHub Actions проверяет, что проект для iPhone собир�
 npm install
 npm run dev             # локально, доступно с телефона в той же сети
 npm run build           # готовая сборка в dist/
-npm test                # автотесты: хранение файлов, шифрование, перенос, корзина
+npm test                # автотесты: хранение, шифрование, перенос, корзина, копии, импорт переписок, обрезка видео
 npm run native:android  # собрать и открыть в Android Studio (после npx cap add android и npm run native:setup)
 npm run native:ios      # собрать и открыть в Xcode
 ```
