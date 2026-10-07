@@ -1,12 +1,13 @@
 {
   "name": "archive-mobile",
   "private": true,
-  "version": "1.1.0",
+  "version": "1.2.0",
   "type": "module",
   "scripts": {
     "dev": "vite --host",
     "build": "vite build",
     "preview": "vite preview --host",
+    "test": "node --test tests/*.test.mjs && node --import ./tests/stubs/register.mjs --test tests/native/*.test.mjs",
     "native:setup": "node scripts/native-setup.mjs",
     "native:sync": "npm run build && npx cap sync",
     "native:android": "npm run native:sync && npx cap open android",

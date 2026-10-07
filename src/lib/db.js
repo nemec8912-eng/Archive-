@@ -1,6 +1,8 @@
 // Локальное хранилище на устройстве (IndexedDB).
 // meta  — структура архива (папки, материалы, настройки)
-// blobs — сами файлы и миниатюры
+// blobs — сами файлы и миниатюры (в приложении для телефона — только в браузерной версии и до переноса)
+import { createFileBlobStore } from './fileBlobs.js';
+import { nativeFs, nativeFilesAvailable } from './nativeFs.js';
 const DB_NAME = 'archive-db';
 const DB_VERSION = 1;
 let dbPromise;
@@ -88,6 +90,24 @@ async function openAny(v, ...keys) {
 
 const rawGet = (store, key) => run(store, 'readonly', (s) => s.get(key));
 const rawPut = (store, key, value) => run(store, 'readwrite', (s) => s.put(value, key));
+const rawDel = (store, ids) => run(store, 'readwrite', (s) => { ids.filter(Boolean).forEach((id) => s.delete(id)); });
+const idbKeys = () => run('blobs', 'readonly', (s) => s.getAllKeys());
+
+// ── Где лежат файлы ──
+// В приложении для iPhone и Android — отдельными файлами в папке приложения (fileBlobs.js),
+// в браузере — в базе. Файлы, оставшиеся в базе от прошлых версий, переносятся в фоне;
+// пока перенос не закончен, чтение и удаление смотрят в оба места.
+const FILES = nativeFilesAvailable() ? createFileBlobStore(nativeFs) : null;
+
+// Перенос и перешифрование не должны идти одновременно.
+let chain = Promise.resolve();
+function exclusive(fn) {
+  const p = chain.then(fn, fn);
+  chain = p.catch(() => {});
+  return p;
+}
+let rekeying = false;
+let REKEY_FROM = null; // старый ключ, пока идёт перешифрование
 
 export async function getMeta(key) {
   const v = await rawGet('meta', key);
@@ -99,43 +119,115 @@ export async function setMeta(key, value) {
   const { iv, ct } = await sealBytes(new TextEncoder().encode(JSON.stringify(value)));
   return rawPut('meta', key, { __sealed: 1, kind: 'json', iv, ct });
 }
-export async function getBlob(id) {
+
+async function idbBlob(id, ...keys) {
   const v = await rawGet('blobs', id);
   if (!v) return v;
-  return isSealed(v) ? openSealed(v) : v;
+  return isSealed(v) ? openAny(v, ...keys) : v;
+}
+
+export async function getBlob(id) {
+  if (FILES) {
+    const b = await FILES.read(id, [KEY, ...(rekeying ? [REKEY_FROM] : [])]);
+    if (b) return b;
+  }
+  return idbBlob(id, KEY, ...(rekeying ? [REKEY_FROM] : []));
 }
 export async function putBlob(id, blob) {
   guard();
+  if (FILES) {
+    await FILES.write(id, blob, KEY);
+    rawDel('blobs', [id]).catch(() => {}); // старая копия в базе больше не нужна
+    return;
+  }
   return rawPut('blobs', id, KEY ? await sealBlob(blob) : blob);
 }
-export const deleteBlobs = (ids) =>
-  run('blobs', 'readwrite', (s) => { ids.filter(Boolean).forEach((id) => s.delete(id)); });
-export const clearBlobs = () => run('blobs', 'readwrite', (s) => s.clear());
-export const blobKeys = () => run('blobs', 'readonly', (s) => s.getAllKeys());
+export async function deleteBlobs(ids) {
+  if (FILES) await FILES.remove(ids);
+  await rawDel('blobs', ids);
+}
+export async function clearBlobs() {
+  if (FILES) await FILES.clear();
+  await run('blobs', 'readwrite', (s) => s.clear());
+}
+export async function blobKeys() {
+  const keys = new Set(await idbKeys());
+  if (FILES) (await FILES.keys()).forEach((k) => keys.add(k));
+  return [...keys];
+}
+export const usesFileStorage = () => !!FILES;
+
+// Фоновый перенос файлов из базы в папку приложения. Ключ не нужен: зашифрованные записи
+// переносятся как есть. Если приложение закроют посередине, перенос продолжится при следующем запуске.
+export function migrateBlobsToFiles(onProgress) {
+  if (!FILES) return Promise.resolve(0);
+  return exclusive(async () => {
+    await FILES.sweepTemp();
+    const keys = await idbKeys();
+    let moved = 0;
+    for (let i = 0; i < keys.length; i++) {
+      onProgress?.(i, keys.length);
+      const id = keys[i];
+      try {
+        const v = await rawGet('blobs', id);
+        if (!v) continue;
+        if (!(await FILES.info(id).catch(() => null))) {
+          await FILES.writeRecord(id, v);
+          // Пока переносили, материал могли удалить — тогда не оставляем лишний файл.
+          if (!(await rawGet('blobs', id))) { await FILES.remove([id]); continue; }
+        }
+        await rawDel('blobs', [id]);
+        moved += 1;
+      } catch {
+        // Запись остаётся в базе и читается оттуда; попробуем ещё раз при следующем запуске.
+      }
+    }
+    onProgress?.(keys.length, keys.length);
+    return moved;
+  });
+}
 
 // Перешифровать всё хранилище: from — текущий ключ (или null для открытых данных), to — новый (или null — снять шифрование).
-export async function rekeyAll(from, to, onProgress) {
-  const keys = await blobKeys();
-  for (let i = 0; i < keys.length; i++) {
-    onProgress?.(i, keys.length);
-    const v = await rawGet('blobs', keys[i]);
-    if (!v) continue;
-    const blob = isSealed(v) ? await openAny(v, from, to) : v;
-    await rawPut('blobs', keys[i], to ? await sealBlob(blob, to) : blob);
-  }
-  const metaKeys = await run('meta', 'readonly', (s) => s.getAllKeys());
-  for (const k of metaKeys) {
-    const v = await rawGet('meta', k);
-    const plain = isSealed(v) ? await openAny(v, from, to) : v;
-    if (to) {
-      const iv = crypto.getRandomValues(new Uint8Array(12));
-      const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, to, new TextEncoder().encode(JSON.stringify(plain)));
-      await rawPut('meta', k, { __sealed: 1, kind: 'json', iv, ct });
-    } else {
-      await rawPut('meta', k, plain);
+export function rekeyAll(from, to, onProgress) {
+  return exclusive(async () => {
+    rekeying = true;
+    REKEY_FROM = from;
+    try {
+      const idb = await idbKeys();
+      const files = FILES ? await FILES.keys() : [];
+      const total = idb.length + files.length;
+      let done = 0;
+      for (const id of files) {
+        onProgress?.(done++, total);
+        const blob = await FILES.read(id, [from, to]);
+        if (blob) await FILES.write(id, blob, to);
+      }
+      for (const id of idb) {
+        onProgress?.(done++, total);
+        const v = await rawGet('blobs', id);
+        if (!v) continue;
+        const blob = isSealed(v) ? await openAny(v, from, to) : v;
+        if (FILES) { await FILES.write(id, blob, to); await rawDel('blobs', [id]); }
+        else await rawPut('blobs', id, to ? await sealBlob(blob, to) : blob);
+      }
+      const metaKeys = await run('meta', 'readonly', (s) => s.getAllKeys());
+      for (const k of metaKeys) {
+        const v = await rawGet('meta', k);
+        const plain = isSealed(v) ? await openAny(v, from, to) : v;
+        if (to) {
+          const iv = crypto.getRandomValues(new Uint8Array(12));
+          const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, to, new TextEncoder().encode(JSON.stringify(plain)));
+          await rawPut('meta', k, { __sealed: 1, kind: 'json', iv, ct });
+        } else {
+          await rawPut('meta', k, plain);
+        }
+      }
+      onProgress?.(total, total);
+    } finally {
+      rekeying = false;
+      REKEY_FROM = null;
     }
-  }
-  onProgress?.(keys.length, keys.length);
+  });
 }
 
 export function uid() {

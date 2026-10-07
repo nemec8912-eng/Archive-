@@ -2,12 +2,10 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useR
 import { getMeta, setMeta, deleteBlobs, blobIdsOf, getBlob, saveBlob, uid, clearBlobs } from './lib/db.js';
 import { DEFAULT_FOLDERS } from './lib/categories.js';
 import { useSecurity } from './security.jsx';
+import { expiredItems, recentlyDeleted } from './lib/trash.js';
 
 const StoreCtx = createContext(null);
-export const TRASH_DAYS = 30; // материалы в корзине удаляются автоматически через 30 дней
-export const RECENT_DAYS = 7; // «Недавно удалённые» — за последнюю неделю
-const DAY = 86400000;
-export const daysLeft = (deletedAt, now = Date.now()) => Math.max(0, Math.ceil((deletedAt + TRASH_DAYS * DAY - now) / DAY));
+export { TRASH_DAYS, RECENT_DAYS, daysLeft } from './lib/trash.js';
 const EMPTY = { folders: [], items: [] };
 
 function seed() {
@@ -95,9 +93,8 @@ export function StoreProvider({ children }) {
   useEffect(() => {
     if (!ready) return undefined;
     const sweep = () => {
-      const limit = Date.now() - TRASH_DAYS * DAY;
       setState((s) => {
-        const old = s.items.filter((i) => i.deletedAt && i.deletedAt < limit);
+        const old = expiredItems(s.items);
         if (!old.length) return s;
         deleteBlobs(old.flatMap(blobIdsOf)).catch(() => {});
         const gone = new Set(old.map((i) => i.id));
@@ -134,7 +131,7 @@ export function StoreProvider({ children }) {
       visible,
       byId,
       trashItems: state.items.filter((i) => i.deletedAt).sort((a, b) => b.deletedAt - a.deletedAt),
-      recentItems: state.items.filter((i) => i.deletedAt && i.deletedAt > Date.now() - RECENT_DAYS * DAY).sort((a, b) => b.deletedAt - a.deletedAt),
+      recentItems: recentlyDeleted(state.items),
       folderById: (id) => state.folders.find((f) => f.id === id),
 
       addItems(list) {
