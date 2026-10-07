@@ -1,0 +1,141 @@
+
+> archive-mobile@1.5.1 postinstall
+> node scripts/postinstall.mjs
+
+media: исправлен вызов call.success() для Capacitor 7
+
+added 161 packages in 20s
+
+> archive-mobile@1.5.1 build
+> vite build
+
+[36mvite v5.4.11 [32mbuilding for production...[36m[39m
+transforming...
+[32m✓[39m 102 modules transformed.
+rendering chunks...
+computing gzip size...
+[2mdist/[22m[32mindex.html                 [39m[1m[2m  1.08 kB[22m[1m[22m[2m │ gzip:   0.48 kB[22m
+[2mdist/[22m[2massets/[22m[35mindex-DJ34Ln0U.css  [39m[1m[2m 44.05 kB[22m[1m[22m[2m │ gzip:   9.24 kB[22m
+[2mdist/[22m[2massets/[22m[36mweb-Cvbx5M7_.js     [39m[1m[2m  0.23 kB[22m[1m[22m[2m │ gzip:   0.16 kB[22m
+[2mdist/[22m[2massets/[22m[36mweb-Cj_E4RIg.js     [39m[1m[2m  0.36 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m
+[2mdist/[22m[2massets/[22m[36mweb-CvYDkJGw.js     [39m[1m[2m  0.73 kB[22m[1m[22m[2m │ gzip:   0.24 kB[22m
+[2mdist/[22m[2massets/[22m[36mweb-TpVkJAgR.js     [39m[1m[2m  0.76 kB[22m[1m[22m[2m │ gzip:   0.35 kB[22m
+[2mdist/[22m[2massets/[22m[36mweb-DmN519-m.js     [39m[1m[2m  0.90 kB[22m[1m[22m[2m │ gzip:   0.45 kB[22m
+[2mdist/[22m[2massets/[22m[36mweb-B1SsRe6P.js     [39m[1m[2m  0.97 kB[22m[1m[22m[2m │ gzip:   0.41 kB[22m
+[2mdist/[22m[2massets/[22m[36mweb-B-IVqEAy.js     [39m[1m[2m  8.69 kB[22m[1m[22m[2m │ gzip:   2.96 kB[22m
+[2mdist/[22m[2massets/[22m[36mindex-DmQ5nbdy.js   [39m[1m[2m335.85 kB[22m[1m[22m[2m │ gzip: 112.26 kB[22m
+[32m✓ built in 9.37s[39m
+✔ Adding native Xcode project in ios in 17.65ms
+✔ add in 17.94ms
+✔ Copying web assets from dist to ios/App/App/public in 5.19ms
+✔ Creating capacitor.config.json in ios/App/App in 410.33μs
+✔ copy ios in 28.23ms
+✔ Updating iOS plugins in 1.33ms
+✔ Updating iOS native dependencies with pod install in 17.35s
+[info] Found 7 Capacitor plugins for ios:
+       @capacitor-community/media@7.0.1
+       @capacitor-community/privacy-screen@6.1.0
+       @capacitor/app@7.1.2
+       @capacitor/filesystem@7.1.9
+       @capacitor/haptics@7.0.5
+       @capacitor/share@7.0.4
+       @capgo/capacitor-native-biometric@7.6.0
+✔ update ios in 17.41s
+[success] ios platform added!
+Follow the Developer Workflow guide to get building:
+https://capacitorjs.com/docs/basics/workflow
+npm warn deprecated prebuild-install@7.1.3: No longer maintained. Please contact the author of the relevant native addon; alternatives are available.
+npm warn deprecated tar@6.2.1: Old versions of tar are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+npm warn deprecated uuid@7.0.3: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
+npm warn deprecated glob@9.3.5: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+Generating assets for ios
+CREATE ios icon /Users/runner/work/Archive-/Archive-/ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png (56.71 KB)
+CREATE ios splash /Users/runner/work/Archive-/Archive-/ios/App/App/Assets.xcassets/Splash.imageset/Default@1x~universal~anyany.png (227.43 KB)
+CREATE ios splash /Users/runner/work/Archive-/Archive-/ios/App/App/Assets.xcassets/Splash.imageset/Default@2x~universal~anyany.png (227.43 KB)
+CREATE ios splash /Users/runner/work/Archive-/Archive-/ios/App/App/Assets.xcassets/Splash.imageset/Default@3x~universal~anyany.png (227.43 KB)
+CREATE ios splash-dark /Users/runner/work/Archive-/Archive-/ios/App/App/Assets.xcassets/Splash.imageset/Default@1x~universal~anyany-dark.png (227.43 KB)
+CREATE ios splash-dark /Users/runner/work/Archive-/Archive-/ios/App/App/Assets.xcassets/Splash.imageset/Default@2x~universal~anyany-dark.png (227.43 KB)
+CREATE ios splash-dark /Users/runner/work/Archive-/Archive-/ios/App/App/Assets.xcassets/Splash.imageset/Default@3x~universal~anyany-dark.png (227.43 KB)
+
+
+Totals:
+ios: 7 generated, 1.39 MB total
+iOS: Info.plist настроен
+Android: проект не найден, пропуск
+✔ Copying web assets from dist to ios/App/App/public in 14.90ms
+✔ Creating capacitor.config.json in ios/App/App in 1.09ms
+✔ copy ios in 52.43ms
+✔ Updating iOS plugins in 3.33ms
+✔ Updating iOS native dependencies with pod install in 11.95s
+[info] Found 7 Capacitor plugins for ios:
+       @capacitor-community/media@7.0.1
+       @capacitor-community/privacy-screen@6.1.0
+       @capacitor/app@7.1.2
+       @capacitor/filesystem@7.1.9
+       @capacitor/haptics@7.0.5
+       @capacitor/share@7.0.4
+       @capgo/capacitor-native-biometric@7.6.0
+✔ update ios in 12.03s
+[info] Sync finished in 12.176s
+2026-10-07 18:08:05.481 xcodebuild[2408:11517] [MT] IDERunDestination: Supported platforms for the buildables in the current scheme is empty.
+CapgoCapacitorNativeBiometric.framework/Info.plist
+
+sent 252239 bytes  received 70 bytes  27726263 bytes/sec
+total size is 251723  speedup is 1.00
+rsync --delete -av --filter P .*.?????? --links --filter "- CVS/" --filter "- .svn/" --filter "- .git/" --filter "- .hg/" --filter "- Headers" --filter "- PrivateHeaders" --filter "- Modules" "/Users/runner/Library/Developer/Xcode/DerivedData/App-cyliaqkffthkypdpajlikaxbfqfp/Build/Products/Debug-iphonesimulator/SDWebImage/SDWebImage.framework" "/Users/runner/Library/Developer/Xcode/DerivedData/App-cyliaqkffthkypdpajlikaxbfqfp/Build/Products/Debug-iphonesimulator/App.app/Frameworks"
+Transfer starting: 6 files
+SDWebImage.framework/
+SDWebImage.framework/Info.plist
+SDWebImage.framework/SDWebImage
+SDWebImage.framework/SDWebImage.bundle/
+SDWebImage.framework/SDWebImage.bundle/Info.plist
+SDWebImage.framework/SDWebImage.bundle/PrivacyInfo.xcprivacy
+
+sent 1954932 bytes  received 120 bytes  40645571 bytes/sec
+total size is 1953964  speedup is 1.00
+rsync --delete -av --filter P .*.?????? --links --filter "- CVS/" --filter "- .svn/" --filter "- .git/" --filter "- .hg/" --filter "- Headers" --filter "- PrivateHeaders" --filter "- Modules" "/Users/runner/Library/Developer/Xcode/DerivedData/App-cyliaqkffthkypdpajlikaxbfqfp/Build/Products/Debug-iphonesimulator/XCFrameworkIntermediates/IONFilesystemLib/IONFilesystemLib.framework" "/Users/runner/Library/Developer/Xcode/DerivedData/App-cyliaqkffthkypdpajlikaxbfqfp/Build/Products/Debug-iphonesimulator/App.app/Frameworks"
+Transfer starting: 5 files
+IONFilesystemLib.framework/
+IONFilesystemLib.framework/IONFilesystemLib
+IONFilesystemLib.framework/Info.plist
+IONFilesystemLib.framework/_CodeSignature/
+IONFilesystemLib.framework/_CodeSignature/CodeResources
+
+sent 306605 bytes  received 98 bytes  30366633 bytes/sec
+total size is 305935  speedup is 1.00
+
+CopySwiftLibs /Users/runner/Library/Developer/Xcode/DerivedData/App-cyliaqkffthkypdpajlikaxbfqfp/Build/Products/Debug-iphonesimulator/App.app (in target 'App' from project 'App')
+    cd /Users/runner/work/Archive-/Archive-/ios/App
+    builtin-swiftStdLibTool --copy --verbose --scan-executable /Users/runner/Library/Developer/Xcode/DerivedData/App-cyliaqkffthkypdpajlikaxbfqfp/Build/Products/Debug-iphonesimulator/App.app/App.debug.dylib --scan-folder /Users/runner/Library/Developer/Xcode/DerivedData/App-cyliaqkffthkypdpajlikaxbfqfp/Build/Products/Debug-iphonesimulator/App.app/Frameworks --scan-folder /Users/runner/Library/Developer/Xcode/DerivedData/App-cyliaqkffthkypdpajlikaxbfqfp/Build/Products/Debug-iphonesimulator/App.app/PlugIns --scan-folder /Users/runner/Library/Developer/Xcode/DerivedData/App-cyliaqkffthkypdpajlikaxbfqfp/Build/Products/Debug-iphonesimulator/App.app/SystemExtensions --scan-folder /Users/runner/Library/Developer/Xcode/DerivedData/App-cyliaqkffthkypdpajlikaxbfqfp/Build/Products/Debug-iphonesimulator/App.app/Extensions --scan-folder /Users/runner/Library/Developer/Xcode/DerivedData/App-cyliaqkffthkypdpajlikaxbfqfp/Build/Products/Debug-iphonesimulator/Pods_App.framework --platform iphonesimulator --toolchain /var/run/com.apple.security.cryptexd/mnt/com.apple.MobileAsset.MetalToolchain-v17.6.109.0.VqHg4A/Metal.xctoolchain --toolchain /Applications/Xcode_26.6.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --destination /Users/runner/Library/Developer/Xcode/DerivedData/App-cyliaqkffthkypdpajlikaxbfqfp/Build/Products/Debug-iphonesimulator/App.app/Frameworks --strip-bitcode --strip-bitcode-tool /Applications/Xcode_26.6.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/bitcode_strip --emit-dependency-info /Users/runner/Library/Developer/Xcode/DerivedData/App-cyliaqkffthkypdpajlikaxbfqfp/Build/Intermediates.noindex/App.build/Debug-iphonesimulator/App.build/SwiftStdLibToolInputDependencies.dep --filter-for-swift-os --back-deploy-swift-concurrency --back-deploy-swift-span
+Ignoring --strip-bitcode because --sign was not passed
+
+ExtractAppIntentsMetadata (in target 'App' from project 'App')
+    cd /Users/runner/work/Archive-/Archive-/ios/App
+    /Applications/Xcode_26.6.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/appintentsmetadataprocessor --toolchain-dir /var/run/com.apple.security.cryptexd/mnt/com.apple.MobileAsset.MetalToolchain-v17.6.109.0.VqHg4A/Metal.xctoolchain --module-name App --sdk-root /Applications/Xcode_26.6.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.5.sdk --xcode-version 17F113 --platform-family iOS --deployment-target 14.0 --bundle-identifier com.nemec8912.archive --output /Users/runner/Library/Developer/Xcode/DerivedData/App-cyliaqkffthkypdpajlikaxbfqfp/Build/Products/Debug-iphonesimulator/App.app --target-triple arm64-apple-ios14.0-simulator --target-triple x86_64-apple-ios14.0-simulator --binary-file /Users/runner/Library/Developer/Xcode/DerivedData/App-cyliaqkffthkypdpajlikaxbfqfp/Build/Products/Debug-iphonesimulator/App.app/App --dependency-file /Users/runner/Library/Developer/Xcode/DerivedData/App-cyliaqkffthkypdpajlikaxbfqfp/Build/Intermediates.noindex/App.build/Debug-iphonesimulator/App.build/Objects-normal/arm64/App_dependency_info.dat --dependency-file /Users/runner/Library/Developer/Xcode/DerivedData/App-cyliaqkffthkypdpajlikaxbfqfp/Build/Intermediates.noindex/App.build/Debug-iphonesimulator/App.build/Objects-normal/x86_64/App_dependency_info.dat --stringsdata-file /Users/runner/Library/Developer/Xcode/DerivedData/App-cyliaqkffthkypdpajlikaxbfqfp/Build/Intermediates.noindex/App.build/Debug-iphonesimulator/App.build/Objects-normal/arm64/ExtractedAppShortcutsMetadata.stringsdata --stringsdata-file /Users/runner/Library/Developer/Xcode/DerivedData/App-cyliaqkffthkypdpajlikaxbfqfp/Build/Intermediates.noindex/App.build/Debug-iphonesimulator/App.build/Objects-normal/x86_64/ExtractedAppShortcutsMetadata.stringsdata --source-file-list /Users/runner/Library/Developer/Xcode/DerivedData/App-cyliaqkffthkypdpajlikaxbfqfp/Build/Intermediates.noindex/App.build/Debug-iphonesimulator/App.build/Objects-normal/arm64/App.SwiftFileList --source-file-list /Users/runner/Library/Developer/Xcode/DerivedData/App-cyliaqkffthkypdpajlikaxbfqfp/Build/Intermediates.noindex/App.build/Debug-iphonesimulator/App.build/Objects-normal/x86_64/App.SwiftFileList --metadata-file-list /Users/runner/Library/Developer/Xcode/DerivedData/App-cyliaqkffthkypdpajlikaxbfqfp/Build/Intermediates.noindex/App.build/Debug-iphonesimulator/App.build/App.DependencyMetadataFileList --static-metadata-file-list /Users/runner/Library/Developer/Xcode/DerivedData/App-cyliaqkffthkypdpajlikaxbfqfp/Build/Intermediates.noindex/App.build/Debug-iphonesimulator/App.build/App.DependencyStaticMetadataFileList --swift-const-vals-list /Users/runner/Library/Developer/Xcode/DerivedData/App-cyliaqkffthkypdpajlikaxbfqfp/Build/Intermediates.noindex/App.build/Debug-iphonesimulator/App.build/Objects-normal/arm64/App.SwiftConstValuesFileList --swift-const-vals-list /Users/runner/Library/Developer/Xcode/DerivedData/App-cyliaqkffthkypdpajlikaxbfqfp/Build/Intermediates.noindex/App.build/Debug-iphonesimulator/App.build/Objects-normal/x86_64/App.SwiftConstValuesFileList --compile-time-extraction --deployment-aware-processing --validate-assistant-intents --no-app-shortcuts-localization
+2026-10-07 18:09:48.828 appintentsmetadataprocessor[6048:22609] Starting appintentsmetadataprocessor export
+2026-10-07 18:09:48.834 appintentsmetadataprocessor[6048:22609] warning: Metadata extraction skipped. No AppIntents.framework dependency found.
+
+AppIntentsSSUTraining (in target 'App' from project 'App')
+    cd /Users/runner/work/Archive-/Archive-/ios/App
+    /Applications/Xcode_26.6.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/appintentsnltrainingprocessor --infoplist-path /Users/runner/Library/Developer/Xcode/DerivedData/App-cyliaqkffthkypdpajlikaxbfqfp/Build/Products/Debug-iphonesimulator/App.app/Info.plist --temp-dir-path /Users/runner/Library/Developer/Xcode/DerivedData/App-cyliaqkffthkypdpajlikaxbfqfp/Build/Intermediates.noindex/App.build/Debug-iphonesimulator/App.build/ssu --bundle-id com.nemec8912.archive --product-path /Users/runner/Library/Developer/Xcode/DerivedData/App-cyliaqkffthkypdpajlikaxbfqfp/Build/Products/Debug-iphonesimulator/App.app --extracted-metadata-path /Users/runner/Library/Developer/Xcode/DerivedData/App-cyliaqkffthkypdpajlikaxbfqfp/Build/Products/Debug-iphonesimulator/App.app/Metadata.appintents --metadata-file-list /Users/runner/Library/Developer/Xcode/DerivedData/App-cyliaqkffthkypdpajlikaxbfqfp/Build/Intermediates.noindex/App.build/Debug-iphonesimulator/App.build/App.DependencyMetadataFileList --source-file /Users/runner/Library/Developer/Xcode/DerivedData/App-cyliaqkffthkypdpajlikaxbfqfp/Build/Products/Debug-iphonesimulator/App.app/Info.plist --archive-ssu-assets
+2026-10-07 18:09:48.887 appintentsnltrainingprocessor[6049:22615] Parsing options for appintentsnltrainingprocessor
+2026-10-07 18:09:48.888 appintentsnltrainingprocessor[6049:22615] Starting AppIntents SSU YAML Generation
+2026-10-07 18:09:48.889 appintentsnltrainingprocessor[6049:22615] No AppShortcuts found - Skipping.
+
+RegisterExecutionPolicyException /Users/runner/Library/Developer/Xcode/DerivedData/App-cyliaqkffthkypdpajlikaxbfqfp/Build/Products/Debug-iphonesimulator/App.app (in target 'App' from project 'App')
+    cd /Users/runner/work/Archive-/Archive-/ios/App
+    builtin-RegisterExecutionPolicyException /Users/runner/Library/Developer/Xcode/DerivedData/App-cyliaqkffthkypdpajlikaxbfqfp/Build/Products/Debug-iphonesimulator/App.app
+
+Validate /Users/runner/Library/Developer/Xcode/DerivedData/App-cyliaqkffthkypdpajlikaxbfqfp/Build/Products/Debug-iphonesimulator/App.app (in target 'App' from project 'App')
+    cd /Users/runner/work/Archive-/Archive-/ios/App
+    builtin-validationUtility /Users/runner/Library/Developer/Xcode/DerivedData/App-cyliaqkffthkypdpajlikaxbfqfp/Build/Products/Debug-iphonesimulator/App.app -shallow-bundle -infoplist-subpath Info.plist
+
+Touch /Users/runner/Library/Developer/Xcode/DerivedData/App-cyliaqkffthkypdpajlikaxbfqfp/Build/Products/Debug-iphonesimulator/App.app (in target 'App' from project 'App')
+    cd /Users/runner/work/Archive-/Archive-/ios/App
+    /usr/bin/touch -c /Users/runner/Library/Developer/Xcode/DerivedData/App-cyliaqkffthkypdpajlikaxbfqfp/Build/Products/Debug-iphonesimulator/App.app
+
+warning: Run script build phase '[CP] Copy XCFrameworks' will be run during every build because it does not specify any outputs. To address this issue, either add output dependencies to the script phase, or configure it to run in every build by unchecking "Based on dependency analysis" in the script phase. (in target 'IONFilesystemLib' from project 'Pods')
+warning: Run script build phase '[CP] Embed Pods Frameworks' will be run during every build because it does not specify any outputs. To address this issue, either add output dependencies to the script phase, or configure it to run in every build by unchecking "Based on dependency analysis" in the script phase. (in target 'App' from project 'App')
+** BUILD SUCCEEDED **
+
+iOS: сборка для симулятора прошла
