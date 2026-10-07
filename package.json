@@ -8,6 +8,7 @@
     "build": "vite build",
     "preview": "vite preview --host",
     "test": "node --test tests/*.test.mjs && node --import ./tests/stubs/register.mjs --test tests/native/*.test.mjs",
+    "postinstall": "node scripts/postinstall.mjs",
     "native:setup": "node scripts/native-setup.mjs",
     "native:sync": "npm run build && npx cap sync",
     "native:android": "npm run native:sync && npx cap open android",
