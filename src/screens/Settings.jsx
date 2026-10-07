@@ -13,7 +13,7 @@ import { fileSink } from '../lib/sink.js';
 import { offerFile } from '../lib/media.js';
 import { fmtSize, fmtDate, filesWord } from '../lib/format.js';
 
-const VERSION = '1.4.0';
+const VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : ''; // подставляется при сборке
 
 function Row({ icon, label, value, onClick, children, danger }) {
   return (

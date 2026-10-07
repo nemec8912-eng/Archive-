@@ -8,3 +8,5 @@ private-media/
 uploads/
 archive-android.apk
 ci-*.log
+release-notes.md
+archive-android.kind

@@ -7,6 +7,14 @@ const ANDROID_MANIFEST = 'android/app/src/main/AndroidManifest.xml';
 const ANDROID_STRINGS = 'android/app/src/main/res/values/strings.xml';
 const ANDROID_STYLES = 'android/app/src/main/res/values/styles.xml';
 
+const ANDROID_GRADLE = 'android/app/build.gradle';
+
+// Номер версии — из package.json; номер сборки растёт с каждой версией и каждой сборкой в GitHub Actions,
+// поэтому новая версия всегда ставится поверх старой.
+const VERSION = JSON.parse(fs.readFileSync('package.json', 'utf8')).version;
+const [maj, min, pat] = VERSION.split('.').map((n) => parseInt(n, 10) || 0);
+const BUILD = (maj * 10000 + min * 100 + pat) * 1000 + ((parseInt(process.env.GITHUB_RUN_NUMBER, 10) || 0) % 1000);
+
 const IOS_KEYS = {
   NSCameraUsageDescription: 'Камера нужна, чтобы сделать фото или видео прямо в архив.',
   NSMicrophoneUsageDescription: 'Микрофон нужен для записи голосовых и звука в видео.',
@@ -29,6 +37,8 @@ function patchPlist() {
   set('UIStatusBarStyle', '<string>UIStatusBarStyleLightContent</string>');
   set('UISupportedInterfaceOrientations', '<array>\n\t\t<string>UIInterfaceOrientationPortrait</string>\n\t</array>');
   set('ITSAppUsesNonExemptEncryption', '<false/>');
+  set('CFBundleShortVersionString', `<string>${VERSION}</string>`);
+  set('CFBundleVersion', `<string>${BUILD}</string>`);
   fs.writeFileSync(IOS_PLIST, s);
   console.log('iOS: Info.plist настроен');
 }
@@ -65,7 +75,12 @@ function patchAndroid() {
     }
     fs.writeFileSync(ANDROID_STYLES, sy);
   }
-  console.log('Android: манифест и тема настроены');
+  if (fs.existsSync(ANDROID_GRADLE)) {
+    let g = fs.readFileSync(ANDROID_GRADLE, 'utf8');
+    g = g.replace(/versionCode\s+\d+/, `versionCode ${BUILD}`).replace(/versionName\s+"[^"]*"/, `versionName "${VERSION}"`);
+    fs.writeFileSync(ANDROID_GRADLE, g);
+  }
+  console.log(`Android: манифест и тема настроены, версия ${VERSION} (${BUILD})`);
 }
 
 patchPlist();

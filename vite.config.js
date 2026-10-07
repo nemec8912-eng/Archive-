@@ -1,8 +1,12 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import { readFileSync } from 'fs';
+
+const { version } = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8'));
 
 export default defineConfig({
   base: './',
   plugins: [react()],
+  define: { __APP_VERSION__: JSON.stringify(version) }, // номер версии в Настройках — из package.json
   build: { target: ['es2020', 'safari15'], sourcemap: false },
 });

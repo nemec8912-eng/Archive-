@@ -28,6 +28,8 @@ jobs:
       - name: Сборка APK
         id: build
         continue-on-error: true
+        env:
+          ANDROID_SIGNING: ${{ secrets.ANDROID_SIGNING }}
         run: |
           set -o pipefail
           bash scripts/ci-android.sh 2>&1 | tee ci-android.log
@@ -36,10 +38,12 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          node scripts/release-notes.mjs
+          VERSION=$(node -p "require('./package.json').version")
           if ! gh release view android-latest >/dev/null 2>&1; then
-            gh release create android-latest --prerelease --title "Архив для Android (тестовая сборка)" \
-              --notes "Свежая сборка из main. Установка: скачать archive-android.apk на телефон и открыть."
+            gh release create android-latest --prerelease --title "Архив $VERSION для Android" --notes-file release-notes.md
           fi
+          gh release edit android-latest --title "Архив $VERSION для Android" --notes-file release-notes.md
           gh release upload android-latest archive-android.apk --clobber
       - name: Журнал сборки
         if: always()
