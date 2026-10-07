@@ -1,0 +1,560 @@
+
+> archive-mobile@1.5.1 postinstall
+> node scripts/postinstall.mjs
+
+media: исправлен вызов call.success() для Capacitor 7
+
+added 162 packages in 12s
+
+> archive-mobile@1.5.1 build
+> vite build
+
+[36mvite v5.4.11 [32mbuilding for production...[36m[39m
+transforming...
+[32m✓[39m 102 modules transformed.
+rendering chunks...
+computing gzip size...
+[2mdist/[22m[32mindex.html                 [39m[1m[2m  1.08 kB[22m[1m[22m[2m │ gzip:   0.48 kB[22m
+[2mdist/[22m[2massets/[22m[35mindex-DJ34Ln0U.css  [39m[1m[2m 44.05 kB[22m[1m[22m[2m │ gzip:   9.24 kB[22m
+[2mdist/[22m[2massets/[22m[36mweb-Cvbx5M7_.js     [39m[1m[2m  0.23 kB[22m[1m[22m[2m │ gzip:   0.16 kB[22m
+[2mdist/[22m[2massets/[22m[36mweb-Cj_E4RIg.js     [39m[1m[2m  0.36 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m
+[2mdist/[22m[2massets/[22m[36mweb-CvYDkJGw.js     [39m[1m[2m  0.73 kB[22m[1m[22m[2m │ gzip:   0.24 kB[22m
+[2mdist/[22m[2massets/[22m[36mweb-TpVkJAgR.js     [39m[1m[2m  0.76 kB[22m[1m[22m[2m │ gzip:   0.35 kB[22m
+[2mdist/[22m[2massets/[22m[36mweb-DmN519-m.js     [39m[1m[2m  0.90 kB[22m[1m[22m[2m │ gzip:   0.45 kB[22m
+[2mdist/[22m[2massets/[22m[36mweb-B1SsRe6P.js     [39m[1m[2m  0.97 kB[22m[1m[22m[2m │ gzip:   0.41 kB[22m
+[2mdist/[22m[2massets/[22m[36mweb-B-IVqEAy.js     [39m[1m[2m  8.69 kB[22m[1m[22m[2m │ gzip:   2.96 kB[22m
+[2mdist/[22m[2massets/[22m[36mindex-DmQ5nbdy.js   [39m[1m[2m335.85 kB[22m[1m[22m[2m │ gzip: 112.26 kB[22m
+[32m✓ built in 8.87s[39m
+✔ Adding native android project in android in 41.60ms
+✔ add in 42.04ms
+✔ Copying web assets from dist to android/app/src/main/assets/public in 4.97ms
+✔ Creating capacitor.config.json in android/app/src/main/assets in 415.57μs
+✔ copy android in 18.87ms
+✔ Updating Android plugins in 2.72ms
+[info] Found 7 Capacitor plugins for android:
+       @capacitor-community/media@7.0.1
+       @capacitor-community/privacy-screen@6.1.0
+       @capacitor/app@7.1.2
+       @capacitor/filesystem@7.1.9
+       @capacitor/haptics@7.0.5
+       @capacitor/share@7.0.4
+       @capgo/capacitor-native-biometric@7.6.0
+✔ update android in 36.58ms
+✔ Syncing Gradle in 216.49μs
+[success] android platform added!
+Follow the Developer Workflow guide to get building:
+https://capacitorjs.com/docs/basics/workflow
+npm warn deprecated prebuild-install@7.1.3: No longer maintained. Please contact the author of the relevant native addon; alternatives are available.
+npm warn deprecated tar@6.2.1: Old versions of tar are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+npm warn deprecated uuid@7.0.3: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
+npm warn deprecated glob@9.3.5: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+[log] xml(load) at /home/runner/work/Archive-/Archive-/android/app/src/main/AndroidManifest.xml
+[log] xml(load) Found root namespaces in XML file: http://schemas.android.com/apk/res/android
+Generating assets for android
+CREATE android icon /home/runner/work/Archive-/Archive-/android/app/src/main/res/mipmap-ldpi/ic_launcher.png (843 B)
+CREATE android icon /home/runner/work/Archive-/Archive-/android/app/src/main/res/mipmap-mdpi/ic_launcher.png (1.43 KB)
+CREATE android icon /home/runner/work/Archive-/Archive-/android/app/src/main/res/mipmap-hdpi/ic_launcher.png (2.9 KB)
+CREATE android icon /home/runner/work/Archive-/Archive-/android/app/src/main/res/mipmap-xhdpi/ic_launcher.png (4.4 KB)
+CREATE android icon /home/runner/work/Archive-/Archive-/android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png (7.01 KB)
+CREATE android icon /home/runner/work/Archive-/Archive-/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png (9.04 KB)
+CREATE android icon /home/runner/work/Archive-/Archive-/android/app/src/main/res/mipmap-ldpi/ic_launcher_round.png (1.93 KB)
+CREATE android icon /home/runner/work/Archive-/Archive-/android/app/src/main/res/mipmap-mdpi/ic_launcher_round.png (2.74 KB)
+CREATE android icon /home/runner/work/Archive-/Archive-/android/app/src/main/res/mipmap-hdpi/ic_launcher_round.png (4.14 KB)
+CREATE android icon /home/runner/work/Archive-/Archive-/android/app/src/main/res/mipmap-xhdpi/ic_launcher_round.png (5.64 KB)
+CREATE android icon /home/runner/work/Archive-/Archive-/android/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.png (8.14 KB)
+CREATE android icon /home/runner/work/Archive-/Archive-/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png (9.65 KB)
+CREATE android icon /home/runner/work/Archive-/Archive-/android/app/src/main/res/mipmap-ldpi/ic_launcher_foreground.png (1.45 KB)
+CREATE android icon /home/runner/work/Archive-/Archive-/android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
+CREATE android icon /home/runner/work/Archive-/Archive-/android/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml
+CREATE android icon /home/runner/work/Archive-/Archive-/android/app/src/main/res/mipmap-mdpi/ic_launcher_foreground.png (2.14 KB)
+CREATE android icon /home/runner/work/Archive-/Archive-/android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
+CREATE android icon /home/runner/work/Archive-/Archive-/android/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml
+CREATE android icon /home/runner/work/Archive-/Archive-/android/app/src/main/res/mipmap-hdpi/ic_launcher_foreground.png (3.17 KB)
+CREATE android icon /home/runner/work/Archive-/Archive-/android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
+CREATE android icon /home/runner/work/Archive-/Archive-/android/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml
+CREATE android icon /home/runner/work/Archive-/Archive-/android/app/src/main/res/mipmap-xhdpi/ic_launcher_foreground.png (4.31 KB)
+CREATE android icon /home/runner/work/Archive-/Archive-/android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
+CREATE android icon /home/runner/work/Archive-/Archive-/android/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml
+CREATE android icon /home/runner/work/Archive-/Archive-/android/app/src/main/res/mipmap-xxhdpi/ic_launcher_foreground.png (6.04 KB)
+CREATE android icon /home/runner/work/Archive-/Archive-/android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
+CREATE android icon /home/runner/work/Archive-/Archive-/android/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml
+CREATE android icon /home/runner/work/Archive-/Archive-/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_foreground.png (6.97 KB)
+CREATE android icon /home/runner/work/Archive-/Archive-/android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
+CREATE android icon /home/runner/work/Archive-/Archive-/android/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml
+CREATE android icon /home/runner/work/Archive-/Archive-/android/app/src/main/res/mipmap-ldpi/ic_launcher_background.png (159 B)
+CREATE android icon /home/runner/work/Archive-/Archive-/android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
+CREATE android icon /home/runner/work/Archive-/Archive-/android/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml
+CREATE android icon /home/runner/work/Archive-/Archive-/android/app/src/main/res/mipmap-mdpi/ic_launcher_background.png (210 B)
+CREATE android icon /home/runner/work/Archive-/Archive-/android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
+CREATE android icon /home/runner/work/Archive-/Archive-/android/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml
+CREATE android icon /home/runner/work/Archive-/Archive-/android/app/src/main/res/mipmap-hdpi/ic_launcher_background.png (298 B)
+CREATE android icon /home/runner/work/Archive-/Archive-/android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
+CREATE android icon /home/runner/work/Archive-/Archive-/android/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml
+CREATE android icon /home/runner/work/Archive-/Archive-/android/app/src/main/res/mipmap-xhdpi/ic_launcher_background.png (424 B)
+CREATE android icon /home/runner/work/Archive-/Archive-/android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
+CREATE android icon /home/runner/work/Archive-/Archive-/android/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml
+CREATE android icon /home/runner/work/Archive-/Archive-/android/app/src/main/res/mipmap-xxhdpi/ic_launcher_background.png (833 B)
+CREATE android icon /home/runner/work/Archive-/Archive-/android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
+CREATE android icon /home/runner/work/Archive-/Archive-/android/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml
+CREATE android icon /home/runner/work/Archive-/Archive-/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_background.png (1.12 KB)
+CREATE android icon /home/runner/work/Archive-/Archive-/android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
+CREATE android icon /home/runner/work/Archive-/Archive-/android/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml
+CREATE android splash /home/runner/work/Archive-/Archive-/android/app/src/main/res/drawable/splash.png (9.75 KB)
+CREATE android splash /home/runner/work/Archive-/Archive-/android/app/src/main/res/drawable-land-ldpi/splash.png (6.01 KB)
+CREATE android splash /home/runner/work/Archive-/Archive-/android/app/src/main/res/drawable-land-mdpi/splash.png (9.97 KB)
+CREATE android splash /home/runner/work/Archive-/Archive-/android/app/src/main/res/drawable-land-hdpi/splash.png (21.16 KB)
+CREATE android splash /home/runner/work/Archive-/Archive-/android/app/src/main/res/drawable-land-xhdpi/splash.png (43.22 KB)
+CREATE android splash /home/runner/work/Archive-/Archive-/android/app/src/main/res/drawable-land-xxhdpi/splash.png (67.07 KB)
+CREATE android splash /home/runner/work/Archive-/Archive-/android/app/src/main/res/drawable-land-xxxhdpi/splash.png (97.81 KB)
+CREATE android splash /home/runner/work/Archive-/Archive-/android/app/src/main/res/drawable-port-ldpi/splash.png (6.09 KB)
+CREATE android splash /home/runner/work/Archive-/Archive-/android/app/src/main/res/drawable-port-mdpi/splash.png (9.75 KB)
+CREATE android splash /home/runner/work/Archive-/Archive-/android/app/src/main/res/drawable-port-hdpi/splash.png (21.57 KB)
+CREATE android splash /home/runner/work/Archive-/Archive-/android/app/src/main/res/drawable-port-xhdpi/splash.png (44.77 KB)
+CREATE android splash /home/runner/work/Archive-/Archive-/android/app/src/main/res/drawable-port-xxhdpi/splash.png (66.01 KB)
+CREATE android splash /home/runner/work/Archive-/Archive-/android/app/src/main/res/drawable-port-xxxhdpi/splash.png (97.98 KB)
+CREATE android splash-dark /home/runner/work/Archive-/Archive-/android/app/src/main/res/drawable-night/splash.png (6.01 KB)
+CREATE android splash-dark /home/runner/work/Archive-/Archive-/android/app/src/main/res/drawable-land-night-ldpi/splash.png (6.01 KB)
+CREATE android splash-dark /home/runner/work/Archive-/Archive-/android/app/src/main/res/drawable-land-night-mdpi/splash.png (9.97 KB)
+CREATE android splash-dark /home/runner/work/Archive-/Archive-/android/app/src/main/res/drawable-land-night-hdpi/splash.png (21.16 KB)
+CREATE android splash-dark /home/runner/work/Archive-/Archive-/android/app/src/main/res/drawable-land-night-xhdpi/splash.png (43.22 KB)
+CREATE android splash-dark /home/runner/work/Archive-/Archive-/android/app/src/main/res/drawable-land-night-xxhdpi/splash.png (67.07 KB)
+CREATE android splash-dark /home/runner/work/Archive-/Archive-/android/app/src/main/res/drawable-land-night-xxxhdpi/splash.png (97.81 KB)
+CREATE android splash-dark /home/runner/work/Archive-/Archive-/android/app/src/main/res/drawable-port-night-ldpi/splash.png (6.09 KB)
+CREATE android splash-dark /home/runner/work/Archive-/Archive-/android/app/src/main/res/drawable-port-night-mdpi/splash.png (9.75 KB)
+CREATE android splash-dark /home/runner/work/Archive-/Archive-/android/app/src/main/res/drawable-port-night-hdpi/splash.png (21.57 KB)
+CREATE android splash-dark /home/runner/work/Archive-/Archive-/android/app/src/main/res/drawable-port-night-xhdpi/splash.png (44.77 KB)
+CREATE android splash-dark /home/runner/work/Archive-/Archive-/android/app/src/main/res/drawable-port-night-xxhdpi/splash.png (66.01 KB)
+CREATE android splash-dark /home/runner/work/Archive-/Archive-/android/app/src/main/res/drawable-port-night-xxxhdpi/splash.png (97.98 KB)
+
+
+Totals:
+android: 74 generated, 1.06 MB total
+iOS: проект не найден, пропуск
+Android: манифест и тема настроены, версия 1.5.1 (10501010)
+✔ Copying web assets from dist to android/app/src/main/assets/public in 8.11ms
+✔ Creating capacitor.config.json in android/app/src/main/assets in 614.93μs
+✔ copy android in 20.78ms
+✔ Updating Android plugins in 3.15ms
+[info] Found 7 Capacitor plugins for android:
+       @capacitor-community/media@7.0.1
+       @capacitor-community/privacy-screen@6.1.0
+       @capacitor/app@7.1.2
+       @capacitor/filesystem@7.1.9
+       @capacitor/haptics@7.0.5
+       @capacitor/share@7.0.4
+       @capgo/capacitor-native-biometric@7.6.0
+✔ update android in 40.13ms
+[info] Sync finished in 0.084s
+Downloading https://services.gradle.org/distributions/gradle-8.11.1-all.zip
+.....................10%......................20%......................30%......................40%......................50%......................60%......................70%......................80%......................90%......................100%
+
+Welcome to Gradle 8.11.1!
+
+Here are the highlights of this release:
+ - Parallel load and store for Configuration Cache
+ - Java compilation errors at the end of the build output
+ - Consolidated report for warnings and deprecations
+
+For more details see https://docs.gradle.org/8.11.1/release-notes.html
+
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.11.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+
+> Configure project :app
+WARNING: Using flatDir should be avoided because it doesn't support any meta-data formats.
+
+> Configure project :capacitor-cordova-android-plugins
+WARNING: Using flatDir should be avoided because it doesn't support any meta-data formats.
+
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :app:javaPreCompileDebug
+> Task :capacitor-android:preBuild UP-TO-DATE
+> Task :capacitor-android:preDebugBuild UP-TO-DATE
+> Task :capacitor-app:preBuild UP-TO-DATE
+> Task :capacitor-app:preDebugBuild UP-TO-DATE
+> Task :capacitor-android:writeDebugAarMetadata
+> Task :capacitor-community-media:preBuild UP-TO-DATE
+> Task :capacitor-community-media:preDebugBuild UP-TO-DATE
+> Task :capacitor-app:writeDebugAarMetadata
+> Task :capacitor-community-privacy-screen:preBuild UP-TO-DATE
+> Task :capacitor-community-privacy-screen:preDebugBuild UP-TO-DATE
+> Task :capacitor-community-media:writeDebugAarMetadata
+> Task :capacitor-cordova-android-plugins:preBuild UP-TO-DATE
+> Task :capacitor-cordova-android-plugins:preDebugBuild UP-TO-DATE
+> Task :capacitor-community-privacy-screen:writeDebugAarMetadata
+> Task :capacitor-filesystem:preBuild UP-TO-DATE
+> Task :capacitor-filesystem:preDebugBuild UP-TO-DATE
+> Task :capacitor-cordova-android-plugins:writeDebugAarMetadata
+> Task :capacitor-filesystem:writeDebugAarMetadata
+> Task :capacitor-haptics:preBuild UP-TO-DATE
+> Task :capacitor-haptics:preDebugBuild UP-TO-DATE
+> Task :capacitor-haptics:writeDebugAarMetadata
+> Task :capacitor-share:preBuild UP-TO-DATE
+> Task :capacitor-share:preDebugBuild UP-TO-DATE
+> Task :capgo-capacitor-native-biometric:preBuild UP-TO-DATE
+> Task :capgo-capacitor-native-biometric:preDebugBuild UP-TO-DATE
+> Task :capacitor-share:writeDebugAarMetadata
+> Task :capgo-capacitor-native-biometric:writeDebugAarMetadata
+> Task :app:generateDebugResValues
+> Task :capacitor-android:generateDebugResValues
+> Task :capacitor-android:generateDebugResources
+> Task :app:checkDebugAarMetadata
+> Task :capacitor-android:packageDebugResources
+> Task :capacitor-app:generateDebugResValues
+> Task :capacitor-app:generateDebugResources
+> Task :capacitor-app:packageDebugResources
+> Task :capacitor-community-media:generateDebugResValues
+> Task :capacitor-community-media:generateDebugResources
+> Task :capacitor-community-media:packageDebugResources
+> Task :capacitor-community-privacy-screen:generateDebugResValues
+> Task :capacitor-community-privacy-screen:generateDebugResources
+> Task :capacitor-community-privacy-screen:packageDebugResources
+> Task :capacitor-cordova-android-plugins:generateDebugResValues
+> Task :capacitor-cordova-android-plugins:generateDebugResources
+> Task :capacitor-cordova-android-plugins:packageDebugResources
+> Task :capacitor-filesystem:generateDebugResValues
+> Task :capacitor-filesystem:generateDebugResources
+> Task :capacitor-filesystem:packageDebugResources
+> Task :capacitor-haptics:generateDebugResValues
+> Task :capacitor-haptics:generateDebugResources
+> Task :capacitor-haptics:packageDebugResources
+> Task :capacitor-share:generateDebugResValues
+> Task :capacitor-share:generateDebugResources
+> Task :capacitor-share:packageDebugResources
+> Task :capgo-capacitor-native-biometric:generateDebugResValues
+> Task :capgo-capacitor-native-biometric:generateDebugResources
+> Task :capgo-capacitor-native-biometric:packageDebugResources
+> Task :app:mapDebugSourceSetPaths
+> Task :app:generateDebugResources
+> Task :app:packageDebugResources
+> Task :app:createDebugCompatibleScreenManifests
+> Task :app:extractDeepLinksDebug
+> Task :capacitor-android:extractDeepLinksDebug
+> Task :capacitor-app:extractDeepLinksDebug
+> Task :app:parseDebugLocalResources
+> Task :capacitor-community-media:extractDeepLinksDebug
+> Task :capacitor-community-media:processDebugManifest
+> Task :capacitor-android:processDebugManifest
+> Task :capacitor-app:processDebugManifest
+> Task :capacitor-community-privacy-screen:extractDeepLinksDebug
+> Task :capacitor-cordova-android-plugins:extractDeepLinksDebug
+> Task :capacitor-community-privacy-screen:processDebugManifest
+> Task :capacitor-filesystem:extractDeepLinksDebug
+> Task :capacitor-cordova-android-plugins:processDebugManifest
+> Task :capacitor-haptics:extractDeepLinksDebug
+> Task :capacitor-filesystem:processDebugManifest
+> Task :capacitor-haptics:processDebugManifest
+> Task :capacitor-share:extractDeepLinksDebug
+> Task :capacitor-share:processDebugManifest
+> Task :capgo-capacitor-native-biometric:extractDeepLinksDebug
+> Task :capgo-capacitor-native-biometric:processDebugManifest
+> Task :app:mergeDebugResources
+> Task :capacitor-android:compileDebugLibraryResources
+> Task :app:processDebugMainManifest
+> Task :app:processDebugManifest
+> Task :app:processDebugManifestForPackage
+> Task :capacitor-app:compileDebugLibraryResources
+> Task :capacitor-android:parseDebugLocalResources
+> Task :capacitor-community-media:compileDebugLibraryResources
+> Task :capacitor-app:parseDebugLocalResources
+> Task :capacitor-community-privacy-screen:compileDebugLibraryResources
+> Task :capacitor-community-media:parseDebugLocalResources
+> Task :capacitor-community-privacy-screen:parseDebugLocalResources
+> Task :capacitor-app:generateDebugRFile
+> Task :capacitor-android:generateDebugRFile
+> Task :capacitor-community-media:generateDebugRFile
+> Task :capacitor-cordova-android-plugins:compileDebugLibraryResources
+> Task :capacitor-community-privacy-screen:generateDebugRFile
+> Task :capacitor-cordova-android-plugins:parseDebugLocalResources
+> Task :capacitor-filesystem:compileDebugLibraryResources
+> Task :capacitor-haptics:compileDebugLibraryResources
+> Task :capacitor-filesystem:parseDebugLocalResources
+> Task :capacitor-share:compileDebugLibraryResources
+> Task :capacitor-cordova-android-plugins:generateDebugRFile
+> Task :capacitor-haptics:parseDebugLocalResources
+> Task :capacitor-filesystem:generateDebugRFile
+> Task :capacitor-share:parseDebugLocalResources
+> Task :capacitor-haptics:generateDebugRFile
+> Task :capacitor-share:generateDebugRFile
+> Task :capgo-capacitor-native-biometric:compileDebugLibraryResources
+> Task :capacitor-android:javaPreCompileDebug
+> Task :capacitor-app:javaPreCompileDebug
+> Task :capacitor-community-media:javaPreCompileDebug
+> Task :capgo-capacitor-native-biometric:parseDebugLocalResources
+
+> Task :capacitor-android:compileDebugJavaWithJavac
+Note: Some input files use unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+
+> Task :capgo-capacitor-native-biometric:generateDebugRFile
+> Task :capacitor-android:bundleLibCompileToJarDebug
+> Task :capacitor-app:compileDebugJavaWithJavac
+> Task :capacitor-app:bundleLibCompileToJarDebug
+> Task :app:processDebugResources
+
+> Task :capacitor-community-media:compileDebugJavaWithJavac
+Note: /home/runner/work/Archive-/Archive-/node_modules/@capacitor-community/media/android/src/main/java/com/getcapacitor/community/media/MediaPlugin.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+
+> Task :capacitor-community-media:bundleLibCompileToJarDebug
+> Task :capacitor-community-privacy-screen:javaPreCompileDebug
+> Task :capacitor-cordova-android-plugins:javaPreCompileDebug
+> Task :capacitor-community-privacy-screen:compileDebugJavaWithJavac
+> Task :capacitor-community-privacy-screen:bundleLibCompileToJarDebug
+> Task :capacitor-cordova-android-plugins:compileDebugJavaWithJavac NO-SOURCE
+> Task :capacitor-filesystem:checkKotlinGradlePluginConfigurationErrors
+> Task :capacitor-cordova-android-plugins:bundleLibCompileToJarDebug
+> Task :capacitor-filesystem:javaPreCompileDebug
+> Task :capacitor-haptics:javaPreCompileDebug
+> Task :capacitor-share:javaPreCompileDebug
+> Task :capgo-capacitor-native-biometric:javaPreCompileDebug
+> Task :capacitor-haptics:compileDebugJavaWithJavac
+> Task :capacitor-haptics:bundleLibCompileToJarDebug
+> Task :capacitor-share:compileDebugJavaWithJavac
+> Task :capacitor-share:bundleLibCompileToJarDebug
+
+> Task :capgo-capacitor-native-biometric:compileDebugJavaWithJavac
+Java compiler version 21 has deprecated support for compiling with source/target version 8.
+Try one of the following options:
+    1. [Recommended] Use Java toolchain with a lower language version
+    2. Set a higher source/target version
+    3. Use a lower version of the JDK running the build (if you're not using Java toolchain)
+For more details on how to configure these settings, see https://developer.android.com/build/jdks.
+To suppress this warning, set android.javaCompile.suppressSourceTargetDeprecationWarning=true in gradle.properties.
+warning: [options] source value 8 is obsolete and will be removed in a future release
+warning: [options] target value 8 is obsolete and will be removed in a future release
+warning: [options] To suppress warnings about obsolete options, use -Xlint:-options.
+Note: /home/runner/work/Archive-/Archive-/node_modules/@capgo/capacitor-native-biometric/android/src/main/java/ee/forgr/biometric/AuthActivity.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+3 warnings
+
+> Task :capgo-capacitor-native-biometric:bundleLibCompileToJarDebug
+> Task :app:mergeDebugShaders
+> Task :app:compileDebugShaders NO-SOURCE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :capacitor-android:mergeDebugShaders
+> Task :capacitor-android:compileDebugShaders NO-SOURCE
+> Task :capacitor-android:generateDebugAssets UP-TO-DATE
+> Task :capacitor-android:packageDebugAssets
+> Task :capacitor-app:mergeDebugShaders
+> Task :capacitor-app:compileDebugShaders NO-SOURCE
+> Task :capacitor-app:generateDebugAssets UP-TO-DATE
+> Task :capacitor-app:packageDebugAssets
+> Task :capacitor-community-media:mergeDebugShaders
+> Task :capacitor-community-media:compileDebugShaders NO-SOURCE
+> Task :capacitor-community-media:generateDebugAssets UP-TO-DATE
+> Task :capacitor-community-media:packageDebugAssets
+> Task :capacitor-community-privacy-screen:mergeDebugShaders
+> Task :capacitor-community-privacy-screen:compileDebugShaders NO-SOURCE
+> Task :capacitor-community-privacy-screen:generateDebugAssets UP-TO-DATE
+> Task :capacitor-community-privacy-screen:packageDebugAssets
+> Task :capacitor-cordova-android-plugins:mergeDebugShaders
+> Task :capacitor-cordova-android-plugins:compileDebugShaders NO-SOURCE
+> Task :capacitor-cordova-android-plugins:generateDebugAssets UP-TO-DATE
+> Task :capacitor-cordova-android-plugins:packageDebugAssets
+> Task :capacitor-filesystem:mergeDebugShaders
+> Task :capacitor-filesystem:compileDebugShaders NO-SOURCE
+> Task :capacitor-filesystem:generateDebugAssets UP-TO-DATE
+> Task :capacitor-filesystem:packageDebugAssets
+> Task :capacitor-haptics:mergeDebugShaders
+> Task :capacitor-haptics:compileDebugShaders NO-SOURCE
+> Task :capacitor-haptics:generateDebugAssets UP-TO-DATE
+> Task :capacitor-haptics:packageDebugAssets
+> Task :capacitor-share:mergeDebugShaders
+> Task :capacitor-share:compileDebugShaders NO-SOURCE
+> Task :capacitor-share:generateDebugAssets UP-TO-DATE
+> Task :capacitor-share:packageDebugAssets
+> Task :capgo-capacitor-native-biometric:mergeDebugShaders
+> Task :capgo-capacitor-native-biometric:compileDebugShaders NO-SOURCE
+> Task :capgo-capacitor-native-biometric:generateDebugAssets UP-TO-DATE
+> Task :capgo-capacitor-native-biometric:packageDebugAssets
+> Task :app:mergeDebugAssets
+> Task :capacitor-community-media:bundleLibRuntimeToJarDebug
+> Task :capacitor-android:bundleLibRuntimeToJarDebug
+> Task :capacitor-community-privacy-screen:bundleLibRuntimeToJarDebug
+> Task :app:compressDebugAssets
+> Task :capacitor-app:bundleLibRuntimeToJarDebug
+> Task :capacitor-haptics:bundleLibRuntimeToJarDebug
+> Task :capacitor-share:bundleLibRuntimeToJarDebug
+> Task :capgo-capacitor-native-biometric:bundleLibRuntimeToJarDebug
+> Task :capacitor-cordova-android-plugins:bundleLibRuntimeToJarDebug
+> Task :app:desugarDebugFileDependencies
+> Task :app:processDebugJavaRes NO-SOURCE
+> Task :capacitor-android:processDebugJavaRes NO-SOURCE
+> Task :capacitor-app:processDebugJavaRes NO-SOURCE
+> Task :capacitor-community-media:processDebugJavaRes NO-SOURCE
+> Task :capacitor-community-privacy-screen:processDebugJavaRes NO-SOURCE
+> Task :capacitor-cordova-android-plugins:processDebugJavaRes NO-SOURCE
+> Task :capacitor-haptics:processDebugJavaRes NO-SOURCE
+> Task :capacitor-share:processDebugJavaRes NO-SOURCE
+> Task :capgo-capacitor-native-biometric:processDebugJavaRes NO-SOURCE
+> Task :app:mergeDebugJniLibFolders
+> Task :capacitor-android:mergeDebugJniLibFolders
+> Task :capacitor-android:mergeDebugNativeLibs NO-SOURCE
+> Task :app:checkDebugDuplicateClasses
+> Task :capacitor-android:copyDebugJniLibsProjectOnly
+
+> Task :capacitor-filesystem:compileDebugKotlin
+w: file:///home/runner/work/Archive-/Archive-/node_modules/@capacitor/filesystem/android/src/main/kotlin/com/capacitorjs/plugins/filesystem/FilesystemPlugin.kt:335:31 'downloadFile(PluginCall): Unit' is deprecated. Use @capacitor/file-transfer plugin instead
+w: file:///home/runner/work/Archive-/Archive-/node_modules/@capacitor/filesystem/android/src/main/kotlin/com/capacitorjs/plugins/filesystem/LegacyFilesystemImplementation.kt:66:29 Type mismatch: inferred type is String? but String was expected
+w: file:///home/runner/work/Archive-/Archive-/node_modules/@capacitor/filesystem/android/src/main/kotlin/com/capacitorjs/plugins/filesystem/LegacyFilesystemImplementation.kt:143:25 Unnecessary non-null assertion (!!) on a non-null receiver of type Boolean
+w: file:///home/runner/work/Archive-/Archive-/node_modules/@capacitor/filesystem/android/src/main/kotlin/com/capacitorjs/plugins/filesystem/LegacyFilesystemImplementation.kt:152:21 Unnecessary non-null assertion (!!) on a non-null receiver of type Boolean
+
+> Task :app:mergeExtDexDebug
+> Task :capacitor-filesystem:compileDebugJavaWithJavac NO-SOURCE
+> Task :capacitor-filesystem:bundleLibCompileToJarDebug
+> Task :capacitor-filesystem:bundleLibRuntimeToJarDebug
+> Task :capacitor-filesystem:processDebugJavaRes
+> Task :app:compileDebugJavaWithJavac
+> Task :app:dexBuilderDebug
+> Task :app:mergeDebugGlobalSynthetics
+> Task :app:mergeLibDexDebug
+> Task :capacitor-app:mergeDebugJniLibFolders
+> Task :capacitor-app:mergeDebugNativeLibs NO-SOURCE
+> Task :capacitor-app:copyDebugJniLibsProjectOnly
+> Task :app:mergeProjectDexDebug
+> Task :capacitor-community-media:mergeDebugJniLibFolders
+> Task :capacitor-community-media:mergeDebugNativeLibs NO-SOURCE
+> Task :capacitor-community-media:copyDebugJniLibsProjectOnly
+> Task :capacitor-community-privacy-screen:mergeDebugJniLibFolders
+> Task :capacitor-community-privacy-screen:mergeDebugNativeLibs NO-SOURCE
+> Task :capacitor-community-privacy-screen:copyDebugJniLibsProjectOnly
+> Task :capacitor-cordova-android-plugins:mergeDebugJniLibFolders
+> Task :capacitor-cordova-android-plugins:mergeDebugNativeLibs NO-SOURCE
+> Task :capacitor-cordova-android-plugins:copyDebugJniLibsProjectOnly
+> Task :capacitor-filesystem:mergeDebugJniLibFolders
+> Task :capacitor-filesystem:mergeDebugNativeLibs NO-SOURCE
+> Task :capacitor-filesystem:copyDebugJniLibsProjectOnly
+> Task :capacitor-haptics:mergeDebugJniLibFolders
+> Task :capacitor-haptics:mergeDebugNativeLibs NO-SOURCE
+> Task :capacitor-haptics:copyDebugJniLibsProjectOnly
+> Task :capacitor-share:mergeDebugJniLibFolders
+> Task :capacitor-share:mergeDebugNativeLibs NO-SOURCE
+> Task :capacitor-share:copyDebugJniLibsProjectOnly
+> Task :capgo-capacitor-native-biometric:mergeDebugJniLibFolders
+> Task :capgo-capacitor-native-biometric:mergeDebugNativeLibs NO-SOURCE
+> Task :capgo-capacitor-native-biometric:copyDebugJniLibsProjectOnly
+> Task :app:mergeDebugNativeLibs NO-SOURCE
+> Task :app:stripDebugDebugSymbols NO-SOURCE
+> Task :app:mergeDebugJavaResource
+> Task :app:validateSigningDebug
+> Task :app:writeDebugAppMetadata
+> Task :app:writeDebugSigningConfigVersions
+> Task :capacitor-android:stripDebugDebugSymbols NO-SOURCE
+> Task :capacitor-android:copyDebugJniLibsProjectAndLocalJars
+> Task :capacitor-android:extractDebugAnnotations
+> Task :capacitor-android:extractDeepLinksForAarDebug
+> Task :capacitor-android:mergeDebugGeneratedProguardFiles
+> Task :capacitor-android:mergeDebugConsumerProguardFiles
+> Task :capacitor-android:prepareDebugArtProfile
+> Task :app:packageDebug
+> Task :app:createDebugApkListingFileRedirect
+> Task :app:assembleDebug
+> Task :capacitor-android:prepareLintJarForPublish
+> Task :capacitor-app:stripDebugDebugSymbols NO-SOURCE
+> Task :capacitor-android:mergeDebugJavaResource
+> Task :capacitor-app:copyDebugJniLibsProjectAndLocalJars
+> Task :capacitor-android:syncDebugLibJars
+> Task :capacitor-android:bundleDebugAar
+> Task :capacitor-android:assembleDebug
+> Task :capacitor-app:extractDebugAnnotations
+> Task :capacitor-app:extractDeepLinksForAarDebug
+> Task :capacitor-app:mergeDebugGeneratedProguardFiles
+> Task :capacitor-app:mergeDebugConsumerProguardFiles
+> Task :capacitor-app:prepareDebugArtProfile
+> Task :capacitor-app:prepareLintJarForPublish
+> Task :capacitor-community-media:stripDebugDebugSymbols NO-SOURCE
+> Task :capacitor-app:mergeDebugJavaResource
+> Task :capacitor-app:syncDebugLibJars
+> Task :capacitor-app:bundleDebugAar
+> Task :capacitor-app:assembleDebug
+> Task :capacitor-community-media:copyDebugJniLibsProjectAndLocalJars
+> Task :capacitor-community-media:extractDebugAnnotations
+> Task :capacitor-community-media:extractDeepLinksForAarDebug
+> Task :capacitor-community-media:mergeDebugGeneratedProguardFiles
+> Task :capacitor-community-media:mergeDebugConsumerProguardFiles
+> Task :capacitor-community-media:prepareDebugArtProfile
+> Task :capacitor-community-media:prepareLintJarForPublish
+> Task :capacitor-community-privacy-screen:stripDebugDebugSymbols NO-SOURCE
+> Task :capacitor-community-media:mergeDebugJavaResource
+> Task :capacitor-community-privacy-screen:copyDebugJniLibsProjectAndLocalJars
+> Task :capacitor-community-privacy-screen:extractDebugAnnotations
+> Task :capacitor-community-media:syncDebugLibJars
+> Task :capacitor-community-media:bundleDebugAar
+> Task :capacitor-community-media:assembleDebug
+> Task :capacitor-community-privacy-screen:extractDeepLinksForAarDebug
+> Task :capacitor-community-privacy-screen:mergeDebugGeneratedProguardFiles
+> Task :capacitor-community-privacy-screen:mergeDebugConsumerProguardFiles
+> Task :capacitor-community-privacy-screen:prepareDebugArtProfile
+> Task :capacitor-community-privacy-screen:prepareLintJarForPublish
+> Task :capacitor-cordova-android-plugins:stripDebugDebugSymbols NO-SOURCE
+> Task :capacitor-community-privacy-screen:mergeDebugJavaResource
+> Task :capacitor-cordova-android-plugins:copyDebugJniLibsProjectAndLocalJars
+> Task :capacitor-community-privacy-screen:syncDebugLibJars
+> Task :capacitor-community-privacy-screen:bundleDebugAar
+> Task :capacitor-community-privacy-screen:assembleDebug
+> Task :capacitor-cordova-android-plugins:extractDebugAnnotations
+> Task :capacitor-cordova-android-plugins:extractDeepLinksForAarDebug
+> Task :capacitor-cordova-android-plugins:mergeDebugGeneratedProguardFiles
+> Task :capacitor-cordova-android-plugins:mergeDebugConsumerProguardFiles
+> Task :capacitor-cordova-android-plugins:prepareDebugArtProfile
+> Task :capacitor-cordova-android-plugins:prepareLintJarForPublish
+> Task :capacitor-filesystem:stripDebugDebugSymbols NO-SOURCE
+> Task :capacitor-filesystem:copyDebugJniLibsProjectAndLocalJars
+> Task :capacitor-cordova-android-plugins:mergeDebugJavaResource
+> Task :capacitor-filesystem:extractDebugAnnotations
+> Task :capacitor-cordova-android-plugins:syncDebugLibJars
+> Task :capacitor-cordova-android-plugins:bundleDebugAar
+> Task :capacitor-cordova-android-plugins:assembleDebug
+> Task :capacitor-filesystem:extractDeepLinksForAarDebug
+> Task :capacitor-filesystem:mergeDebugGeneratedProguardFiles
+> Task :capacitor-filesystem:mergeDebugConsumerProguardFiles
+> Task :capacitor-filesystem:prepareDebugArtProfile
+> Task :capacitor-filesystem:prepareLintJarForPublish
+> Task :capacitor-haptics:stripDebugDebugSymbols NO-SOURCE
+> Task :capacitor-haptics:copyDebugJniLibsProjectAndLocalJars
+> Task :capacitor-filesystem:mergeDebugJavaResource
+> Task :capacitor-haptics:extractDebugAnnotations
+> Task :capacitor-filesystem:syncDebugLibJars
+> Task :capacitor-filesystem:bundleDebugAar
+> Task :capacitor-filesystem:assembleDebug
+> Task :capacitor-haptics:extractDeepLinksForAarDebug
+> Task :capacitor-haptics:mergeDebugGeneratedProguardFiles
+> Task :capacitor-haptics:mergeDebugConsumerProguardFiles
+> Task :capacitor-haptics:prepareDebugArtProfile
+> Task :capacitor-haptics:prepareLintJarForPublish
+> Task :capacitor-haptics:mergeDebugJavaResource
+> Task :capacitor-share:stripDebugDebugSymbols NO-SOURCE
+> Task :capacitor-haptics:syncDebugLibJars
+> Task :capacitor-haptics:bundleDebugAar
+> Task :capacitor-haptics:assembleDebug
+> Task :capacitor-share:copyDebugJniLibsProjectAndLocalJars
+> Task :capacitor-share:extractDebugAnnotations
+> Task :capacitor-share:extractDeepLinksForAarDebug
+> Task :capacitor-share:mergeDebugGeneratedProguardFiles
+> Task :capacitor-share:mergeDebugConsumerProguardFiles
+> Task :capacitor-share:prepareDebugArtProfile
+> Task :capacitor-share:prepareLintJarForPublish
+> Task :capgo-capacitor-native-biometric:stripDebugDebugSymbols NO-SOURCE
+> Task :capacitor-share:mergeDebugJavaResource
+> Task :capgo-capacitor-native-biometric:copyDebugJniLibsProjectAndLocalJars
+> Task :capacitor-share:syncDebugLibJars
+> Task :capacitor-share:bundleDebugAar
+> Task :capacitor-share:assembleDebug
+> Task :capgo-capacitor-native-biometric:extractDebugAnnotations
+> Task :capgo-capacitor-native-biometric:extractDeepLinksForAarDebug
+> Task :capgo-capacitor-native-biometric:mergeDebugGeneratedProguardFiles
+> Task :capgo-capacitor-native-biometric:mergeDebugConsumerProguardFiles
+> Task :capgo-capacitor-native-biometric:prepareDebugArtProfile
+> Task :capgo-capacitor-native-biometric:prepareLintJarForPublish
+> Task :capgo-capacitor-native-biometric:mergeDebugJavaResource
+> Task :capgo-capacitor-native-biometric:syncDebugLibJars
+> Task :capgo-capacitor-native-biometric:bundleDebugAar
+> Task :capgo-capacitor-native-biometric:assembleDebug
+[Incubating] Problems report is available at: file:///home/runner/work/Archive-/Archive-/android/build/reports/problems/problems-report.html
+
+BUILD SUCCESSFUL in 2m 44s
+276 actionable tasks: 276 executed
+APK: archive-android.apk (тестовая, ключ отладки — секрет ANDROID_SIGNING не задан)
