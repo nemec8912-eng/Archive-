@@ -163,7 +163,10 @@ function ImageEditor({ item, onSave, onCancel }) {
   }, [item.blobId]);
 
   // При выходе из редактора память холстов отдаём сразу.
-  useEffect(() => () => { freeCanvas(img?.src); freeCanvas(mosaic.current); freeCanvas(viewRef.current); }, [img]);
+  const imgRef = useRef(null);
+  imgRef.current = img;
+  // Только при закрытии редактора (не при загрузке снимка): иначе мозаика очищалась бы сразу после открытия.
+  useEffect(() => () => { freeCanvas(imgRef.current?.src); freeCanvas(mosaic.current); freeCanvas(viewRef.current); }, []);
 
   const fit = useFit(stageRef, img?.W, img?.H);
 

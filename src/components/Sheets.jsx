@@ -71,7 +71,7 @@ export function Recorder({ onDone, onCancel }) {
     finishing.current = new Promise((resolve) => {
       r.onstop = async () => {
         stopTracks();
-        const type = r.mimeType || 'audio/webm';
+        const type = r.mimeType || r.__mime || 'audio/webm';
         const blob = new Blob(chunks.current, { type });
         if (!blob.size) {
           finishing.current = null;
@@ -110,6 +110,7 @@ export function Recorder({ onDone, onCancel }) {
       const r = new MediaRecorder(stream.current, mime ? { mimeType: mime } : undefined);
       chunks.current = [];
       r.ondataavailable = (e) => e.data.size && chunks.current.push(e.data);
+      r.__mime = mime; // на случай, если устройство не сообщает тип записи
       rec.current = r;
       r.start(1000); // кусками по секунде — если запись оборвётся, сохранится почти всё
       haptic('medium');
