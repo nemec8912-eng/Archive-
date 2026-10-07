@@ -45,7 +45,8 @@ export function SecurityProvider({ children }) {
   const update = (next) => { saveSecurity(next); setSec(next); secRef.current = next; };
 
   const flush = async () => {
-    for (const f of flushers.current) { try { await f(); } catch { /* */ } }
+    // Сначала — открытые окна (запись голосового и т. п.), в конце — сохранение самого архива.
+    for (const f of [...flushers.current].reverse()) { try { await f(); } catch { /* */ } }
   };
 
   const lock = useCallback(async () => {

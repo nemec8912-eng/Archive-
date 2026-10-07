@@ -49,47 +49,85 @@ export function Recorder({ onDone, onCancel }) {
   const [state, setState] = useState('idle');
   const [elapsed, setElapsed] = useState(0);
   const [error, setError] = useState('');
+  const sec = useSecurity();
   const rec = useRef(null);
   const chunks = useRef([]);
   const started = useRef(0);
   const timer = useRef();
   const stream = useRef(null);
+  const finishing = useRef(null);
 
   const stopTracks = () => stream.current?.getTracks().forEach((t) => t.stop());
   useEffect(() => () => { clearInterval(timer.current); stopTracks(); }, []);
+
+  // Остановить запись и дождаться, пока голосовое сохранится.
+  // interrupted — приложение свернули или архив блокируется: сохраняем сразу, без вопросов.
+  const finish = (interrupted = false) => {
+    if (finishing.current) return finishing.current;
+    const r = rec.current;
+    if (!r || r.state === 'inactive') return Promise.resolve();
+    clearInterval(timer.current);
+    setState('saving');
+    finishing.current = new Promise((resolve) => {
+      r.onstop = async () => {
+        stopTracks();
+        const type = r.mimeType || 'audio/webm';
+        const blob = new Blob(chunks.current, { type });
+        if (!blob.size) {
+          finishing.current = null;
+          setState('idle');
+          setElapsed(0);
+          setError('Запись не получилась — попробуйте ещё раз.');
+          resolve();
+          return;
+        }
+        try { await onDone(blob, (Date.now() - started.current) / 1000, { interrupted }); } catch { /* сообщение покажет вызывающий */ }
+        resolve();
+      };
+      try { r.requestData?.(); } catch { /* */ }
+      r.stop();
+    });
+    return finishing.current;
+  };
+
+  // Свернули приложение посреди записи: на телефоне микрофон в фоне останавливается, поэтому сохраняем то, что есть.
+  // Перед блокировкой архива — то же самое, чтобы запись не пропала.
+  useEffect(() => {
+    const onVis = () => { if (document.visibilityState === 'hidden') finish(true); };
+    document.addEventListener('visibilitychange', onVis);
+    window.addEventListener('pagehide', onVis);
+    const off = sec.registerFlush(() => finish(true));
+    return () => { document.removeEventListener('visibilitychange', onVis); window.removeEventListener('pagehide', onVis); off(); };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const start = async () => {
     setError('');
     try {
       markExternal();
-      stream.current = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.current = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
       const mime = ['audio/mp4', 'audio/webm;codecs=opus', 'audio/webm', 'audio/ogg']
         .find((m) => window.MediaRecorder?.isTypeSupported?.(m));
       const r = new MediaRecorder(stream.current, mime ? { mimeType: mime } : undefined);
       chunks.current = [];
       r.ondataavailable = (e) => e.data.size && chunks.current.push(e.data);
-      r.onstop = () => {
-        stopTracks();
-        const type = r.mimeType || mime || 'audio/webm';
-        const blob = new Blob(chunks.current, { type });
-        onDone(blob, (Date.now() - started.current) / 1000);
-      };
       rec.current = r;
-      r.start();
+      r.start(1000); // кусками по секунде — если запись оборвётся, сохранится почти всё
       haptic('medium');
       started.current = Date.now();
       setState('rec');
       timer.current = setInterval(() => setElapsed((Date.now() - started.current) / 1000), 200);
-    } catch {
-      setError('Нет доступа к микрофону. Разрешите доступ в настройках телефона.');
+    } catch (e) {
+      stopTracks();
+      if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) setError('Это устройство не умеет записывать звук в приложении.');
+      else if (e?.name === 'NotFoundError') setError('Микрофон не найден.');
+      else if (e?.name === 'NotReadableError') setError('Микрофон занят другим приложением (например, звонком). Попробуйте ещё раз.');
+      else setError('Нет доступа к микрофону. Разрешите доступ в настройках телефона.');
     }
   };
 
   const stop = () => {
     haptic('medium');
-    clearInterval(timer.current);
-    setState('saving');
-    rec.current?.stop();
+    finish(false);
   };
 
   return (
@@ -383,10 +421,8 @@ export function SheetHost() {
     if (files.length) runImport(files, type);
   };
 
-  const saveVoice = (blob, duration) => {
-    ui.pickFolder({
-      title: 'Куда сохранить?',
-      onPick: async (folderId) => {
+  const saveVoice = (blob, duration, { interrupted } = {}) => {
+    const save = async (folderId) => {
         const now = Date.now();
         const info = await audioInfo(blob, duration);
         const item = {
@@ -405,9 +441,12 @@ export function SheetHost() {
         };
         store.addItems([item]);
         haptic('success');
-        ui.showToast('Голосовое сохранено');
-      },
-    });
+        ui.showToast(interrupted ? 'Запись остановлена: приложение было свёрнуто. Голосовое сохранено' : 'Голосовое сохранено');
+    };
+    // Если запись прервалась, папку не спрашиваем — сохраняем сразу, чтобы ничего не потерять.
+    if (interrupted) return save(null);
+    ui.pickFolder({ title: 'Куда сохранить?', onPick: save });
+    return undefined;
   };
 
   const addActions = [
@@ -471,7 +510,7 @@ export function SheetHost() {
   } else if (s?.type === 'prompt') {
     content = <Prompt {...s} onClose={close} />;
   } else if (s?.type === 'recorder') {
-    content = <Recorder onCancel={close} onDone={(blob, dur) => { close(); s.onDone(blob, dur); }} />;
+    content = <Recorder onCancel={close} onDone={(blob, dur, opts) => { close(); return s.onDone(blob, dur, opts); }} />;
   } else if (s?.type === 'help') {
     content = <Help onClose={close} />;
   }

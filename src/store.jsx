@@ -85,6 +85,7 @@ export function StoreProvider({ children }) {
   // Перед блокировкой и перешифрованием — немедленно сохранить несохранённое.
   useEffect(() => sec.registerFlush(async () => {
     if (!readyRef.current) return;
+    await new Promise((r) => setTimeout(r, 0)); // дать примениться изменениям, сделанным прямо перед блокировкой
     clearTimeout(saveTimer.current);
     await setMeta('state', stateRef.current);
   }), []); // eslint-disable-line react-hooks/exhaustive-deps

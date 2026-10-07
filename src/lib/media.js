@@ -191,7 +191,7 @@ export async function shareItem(item) {
       return window.ArchiveNative.shareText(item.name, item.type === 'note' ? item.text || '' : chatToText(item));
     }
     const blob = await getBlob(item.blobId);
-    if (blob) await window.ArchiveNative.saveToGallery([new File([blob], item.name, { type: item.mime || blob.type })]);
+    if (blob) await window.ArchiveNative.shareFiles([new File([blob], item.name, { type: item.mime || blob.type })]);
     return undefined;
   }
   try {
@@ -253,7 +253,8 @@ export function looksLikeScreenshot(file, info = {}) {
   return SCREEN_WIDTHS.has(w) && ratio > 1.7 && ratio < 2.4;
 }
 
-// Сохранить несколько материалов в галерею телефона (системное меню «Поделиться» → «Сохранить»).
+// Сохранить несколько материалов в галерею телефона. В приложении — прямо в галерею,
+// в браузере — через системное меню «Поделиться» → «Сохранить» или скачиванием.
 export async function saveToGallery(items) {
   const files = [];
   for (const it of items) {

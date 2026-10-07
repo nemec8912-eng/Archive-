@@ -6,8 +6,14 @@ import { getBlob } from '../lib/db.js';
 import { importFile } from '../lib/media.js';
 import { fmtDur } from '../lib/format.js';
 import { haptic } from '../lib/haptics.js';
+import { trimMp4 } from '../lib/mp4trim.js';
 
 const MAX_SIDE = 4096; // предел рабочего размера фото, чтобы не переполнить память телефона
+// На iPhone память под холсты у WebView заметно меньше — ограничиваем ещё и число точек.
+const IOS = typeof navigator !== 'undefined' && (/iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1));
+const MAX_PIXELS = IOS ? 8_000_000 : 16_000_000;
+// Освободить память холста сразу (iPhone держит её, пока у холста есть размер).
+const freeCanvas = (c) => { if (c) { c.width = 0; c.height = 0; } };
 const ASPECTS = [
   { id: 'free', label: 'Свободно', r: null },
   { id: '1', label: '1:1', r: 1 },
@@ -111,6 +117,7 @@ function ImageEditor({ item, onSave, onCancel }) {
   const [brush, setBrush] = useState('m');
   const [mode, setMode] = useState('pixel');
   const [busy, setBusy] = useState(false);
+  const [loadError, setLoadError] = useState(false);
   const stageRef = useRef();
   const viewRef = useRef();
   const mosaic = useRef(null);
@@ -133,7 +140,7 @@ function ImageEditor({ item, onSave, onCancel }) {
       }
       const w0 = bmp.width || bmp.naturalWidth;
       const h0 = bmp.height || bmp.naturalHeight;
-      const s = Math.min(1, MAX_SIDE / Math.max(w0, h0));
+      const s = Math.min(1, MAX_SIDE / Math.max(w0, h0), Math.sqrt(MAX_PIXELS / (w0 * h0)));
       const W = Math.round(w0 * s);
       const H = Math.round(h0 * s);
       const src = document.createElement('canvas');
@@ -146,18 +153,17 @@ function ImageEditor({ item, onSave, onCancel }) {
       small.width = Math.max(1, Math.round(W / block));
       small.height = Math.max(1, Math.round(H / block));
       small.getContext('2d').drawImage(src, 0, 0, small.width, small.height);
-      const mz = document.createElement('canvas');
-      mz.width = W; mz.height = H;
-      const mctx = mz.getContext('2d');
-      mctx.imageSmoothingEnabled = false;
-      mctx.drawImage(small, 0, 0, W, H);
-      mosaic.current = mz;
-      if (!alive) return;
+      // Мозаика хранится маленькой и растягивается при рисовании — без ещё одного холста во весь размер.
+      mosaic.current = small;
+      if (!alive) { freeCanvas(src); freeCanvas(small); return; }
       setImg({ src, W, H });
       setCrop({ x: 0, y: 0, w: W, h: H });
-    })();
+    })().catch(() => { if (alive) setLoadError(true); });
     return () => { alive = false; };
   }, [item.blobId]);
+
+  // При выходе из редактора память холстов отдаём сразу.
+  useEffect(() => () => { freeCanvas(img?.src); freeCanvas(mosaic.current); freeCanvas(viewRef.current); }, [img]);
 
   const fit = useFit(stageRef, img?.W, img?.H);
 
@@ -180,7 +186,7 @@ function ImageEditor({ item, onSave, onCancel }) {
       if (i >= pts.length) break;
     }
     ctx.clip();
-    if (st.mode === 'pixel') ctx.drawImage(mosaic.current, 0, 0);
+    if (st.mode === 'pixel') { ctx.imageSmoothingEnabled = false; ctx.drawImage(mosaic.current, 0, 0, img.W, img.H); }
     else { ctx.fillStyle = '#0b0c10'; ctx.fillRect(0, 0, img.W, img.H); }
     ctx.restore();
   }, [img]);
@@ -234,6 +240,7 @@ function ImageEditor({ item, onSave, onCancel }) {
     out.getContext('2d').drawImage(c, -Math.round(crop.x), -Math.round(crop.y));
     const png = item.type === 'screenshot' || /png/i.test(item.mime || '');
     const blob = await new Promise((res) => out.toBlob(res, png ? 'image/png' : 'image/jpeg', 0.92));
+    freeCanvas(out);
     setBusy(false);
     if (blob) onSave(blob, png ? 'png' : 'jpg');
   };
@@ -242,7 +249,8 @@ function ImageEditor({ item, onSave, onCancel }) {
   return (
     <>
       <div className="editor-stage" ref={stageRef}>
-        {!img && <div className="viewer-loading" />}
+        {!img && !loadError && <div className="viewer-loading" />}
+        {loadError && <p className="error-text">Не удалось открыть снимок: он слишком большой для этого устройства или повреждён.</p>}
         {img && fit && (
           <div className="editor-canvas" style={{ width: fit.w, height: fit.h }}>
             <canvas
@@ -372,12 +380,37 @@ function VideoEditor({ item, onSave, onCancel }) {
 
   const changed = meta && crop && (range[0] > 0.05 || range[1] < meta.dur - 0.05 || !isFull(crop, meta.W, meta.H));
 
-  // Перекодирование на устройстве: кадр рисуется на холст и записывается вместе со звуком.
+  // Только обрезка по времени — без перекодирования: быстро, без потери качества, на любом телефоне.
+  // Обрезка кадра (или необычный файл) — перекодирование на устройстве.
   const exportVideo = async () => {
     setError('');
+    // Звук для перекодирования включаем сразу по нажатию — иначе iPhone может его не пустить.
+    const AC = window.AudioContext || window.webkitAudioContext;
+    let actx = null;
+    try { actx = AC ? new AC() : null; actx?.resume?.(); } catch { actx = null; }
+    if (isFull(crop, meta.W, meta.H)) {
+      setProgress(-1);
+      try {
+        const src = await getBlob(item.blobId);
+        const out = await trimMp4(src, range[0], range[1]);
+        actx?.close?.();
+        setProgress(null);
+        const ext = (item.name.match(/\.([a-z0-9]{2,4})$/i)?.[1] || (/quicktime/.test(src.type) ? 'mov' : 'mp4')).toLowerCase();
+        onSave(out, ext);
+        return;
+      } catch (e) {
+        setProgress(null);
+        if (e?.code !== 'unsupported') { actx?.close?.(); setError('Не удалось обрезать видео'); return; }
+      }
+    }
+    await reencode(actx);
+  };
+
+  // Перекодирование на устройстве: кадр рисуется на холст и записывается вместе со звуком.
+  const reencode = async (actx) => {
     const mime = pickVideoMime();
     const canvasProto = HTMLCanvasElement.prototype;
-    if (!window.MediaRecorder || !canvasProto.captureStream) { setError('Это устройство не умеет перекодировать видео'); return; }
+    if (!window.MediaRecorder || !canvasProto.captureStream) { actx?.close?.(); setError('Это устройство не умеет перекодировать видео'); return; }
     cancel.current = false;
     setProgress(0);
     const v = document.createElement('video');
@@ -390,10 +423,8 @@ function VideoEditor({ item, onSave, onCancel }) {
     canvas.width = cw; canvas.height = ch;
     const ctx = canvas.getContext('2d');
     const stream = canvas.captureStream(30);
-    let actx;
     try {
-      const AC = window.AudioContext || window.webkitAudioContext;
-      actx = new AC();
+      if (!actx) throw new Error('нет звука');
       const srcNode = actx.createMediaElementSource(v);
       const dest = actx.createMediaStreamDestination();
       srcNode.connect(dest);
@@ -468,7 +499,9 @@ function VideoEditor({ item, onSave, onCancel }) {
           ))}
         </div>
         {error && <p className="error-text">{error}</p>}
-        {progress != null ? (
+        {progress === -1 ? (
+          <div className="export-progress"><p className="muted">Обрезка видео…</p></div>
+        ) : progress != null ? (
           <div className="export-progress">
             <div className="storage-bar"><i style={{ width: `${Math.round(progress * 100)}%` }} /></div>
             <p className="muted">Обработка видео… {Math.round(progress * 100)}%. Занимает столько же времени, сколько длится отрывок.</p>

@@ -40,6 +40,10 @@ function patchAndroid() {
   for (const p of perms) {
     if (!m.includes(`"${p}"`)) m = m.replace(/(\s*<\/manifest>)/, `\n    <uses-permission android:name="${p}" />$1`);
   }
+  // Сохранение в галерею на старых Android (9 и ниже); на новых разрешение не нужно.
+  if (!m.includes('"android.permission.WRITE_EXTERNAL_STORAGE"')) {
+    m = m.replace(/(\s*<\/manifest>)/, '\n    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />$1');
+  }
   if (!m.includes('android.hardware.camera')) {
     m = m.replace(/(\s*<\/manifest>)/, '\n    <uses-feature android:name="android.hardware.camera" android:required="false" />$1');
   }

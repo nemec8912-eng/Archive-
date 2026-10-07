@@ -86,8 +86,8 @@ export function useActions() {
     try {
       const n = await saveToGallery(list);
       if (n) { haptic('success'); ui.showToast(`Готово: ${n}`); } else ui.hideToast();
-    } catch {
-      ui.showToast('Не удалось сохранить');
+    } catch (e) {
+      ui.showToast(e?.code === 'permission' ? e.message : 'Не удалось сохранить');
     }
   };
 

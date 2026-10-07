@@ -12,7 +12,7 @@ import { createBackup, readBackup, restoreBackup } from '../lib/backup.js';
 import { offerFile } from '../lib/media.js';
 import { fmtSize, fmtDate, filesWord } from '../lib/format.js';
 
-const VERSION = '1.2.0';
+const VERSION = '1.3.0';
 
 function Row({ icon, label, value, onClick, children, danger }) {
   return (

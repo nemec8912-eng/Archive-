@@ -1,7 +1,7 @@
 {
   "name": "archive-mobile",
   "private": true,
-  "version": "1.2.0",
+  "version": "1.3.0",
   "type": "module",
   "scripts": {
     "dev": "vite --host",
@@ -14,6 +14,7 @@
     "native:ios": "npm run native:sync && npx cap open ios"
   },
   "dependencies": {
+    "@capacitor-community/media": "^7.0.0",
     "@capacitor-community/privacy-screen": "^6.0.0",
     "@capacitor/android": "^7.0.0",
     "@capacitor/app": "^7.0.0",
