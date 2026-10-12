@@ -467,10 +467,11 @@ function VideoEditor({ item, onSave, onCancel }) {
   return (
     <>
       <div className="editor-stage" ref={stageRef}>
-        {!meta && <div className="viewer-loading" />}
+        {!meta && !error && <div className="viewer-loading" />}
         <div className="editor-canvas" style={fit ? { width: fit.w, height: fit.h } : { width: 1, height: 1, opacity: 0 }}>
           {url && (
             <video ref={videoRef} src={url} playsInline preload="auto" onLoadedMetadata={onMeta} onTimeUpdate={onTime}
+              onError={() => { if (!meta) setError('Это видео не открывается на этом устройстве, поэтому обрезать его здесь не получится.'); }}
               onClick={() => { const v = videoRef.current; if (v.paused) { if (v.currentTime < range[0] || v.currentTime >= range[1]) v.currentTime = range[0]; v.play(); } else v.pause(); }} />
           )}
           {fit && crop && (
@@ -496,11 +497,13 @@ function VideoEditor({ item, onSave, onCancel }) {
             <div className="trim-times"><span>{fmtDur(range[0])}</span><b>{fmtDur(range[1] - range[0])}</b><span>{fmtDur(range[1])}</span></div>
           </div>
         )}
-        <div className="chips editor-chips">
-          {ASPECTS.map((x) => (
-            <button key={x.id} className={`chip ${aspect === x.id ? 'on' : ''}`} onClick={() => { setAspect(x.id); setCrop(aspectRect(meta.W, meta.H, x.r)); }}>{x.label}</button>
-          ))}
-        </div>
+        {meta && (
+          <div className="chips editor-chips">
+            {ASPECTS.map((x) => (
+              <button key={x.id} className={`chip ${aspect === x.id ? 'on' : ''}`} onClick={() => { setAspect(x.id); setCrop(aspectRect(meta.W, meta.H, x.r)); }}>{x.label}</button>
+            ))}
+          </div>
+        )}
         {error && <p className="error-text">{error}</p>}
         {progress === -1 ? (
           <div className="export-progress"><p className="muted">Обрезка видео…</p></div>

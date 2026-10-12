@@ -608,3 +608,6 @@ body.dragging { user-select: none; -webkit-user-select: none; overflow: hidden; 
 
 /* Отметка в конце длинного списка: когда она близко, дорисовывается следующая часть. */
 .list-more { height: 1px; }
+.viewer-error { position: absolute; left: 24px; right: 24px; top: 50%; transform: translateY(-50%); margin: 0; padding: 14px 16px; border-radius: 14px; background: rgba(10, 11, 16, 0.86); color: var(--text); text-align: center; line-height: 1.45; }
+/* Видео в просмотре — между верхней и нижней панелями, чтобы кнопки плеера были доступны. */
+.viewer-video { position: absolute; left: 0; top: var(--viewer-head, 0px); width: 100%; height: calc(100% - var(--viewer-head, 0px) - var(--viewer-foot, 0px)); max-height: none; }

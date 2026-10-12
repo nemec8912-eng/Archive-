@@ -14,6 +14,8 @@ const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 function Media({ item, active, onSize }) {
   const url = useBlobUrl(item?.blobId);
   const videoRef = useRef();
+  const [bad, setBad] = useState(false);
+  useEffect(() => { setBad(false); }, [url]);
   useEffect(() => {
     if (!active && videoRef.current) videoRef.current.pause();
   }, [active]);
@@ -28,7 +30,16 @@ function Media({ item, active, onSize }) {
   }
   if (item.type === 'video') {
     // Встроенный плеер: пауза, перемотка, длительность, полноэкранный режим.
-    return <video ref={videoRef} className="viewer-media" src={url} controls playsInline preload="metadata" />;
+    // Формат, который телефон не умеет воспроизводить, — понятное сообщение вместо пустого экрана.
+    if (bad) {
+      return (
+        <div className="viewer-media-wrap">
+          <Thumb item={item} className="viewer-under" />
+          <p className="viewer-error">Это видео не воспроизводится на этом устройстве. Его можно сохранить в галерею или отправить через «Поделиться» — в другом приложении оно откроется.</p>
+        </div>
+      );
+    }
+    return <video ref={videoRef} className="viewer-media viewer-video" src={url} controls playsInline preload="metadata" onError={() => setBad(true)} />;
   }
   return (
     <img
@@ -52,6 +63,22 @@ export default function Viewer({ route }) {
   const [chrome, setChrome] = useState(true);
   const [zoomed, setZoomed] = useState(false);
   const stripRef = useRef();
+  const footRef = useRef();
+  const headRef = useRef();
+  // Высота верхней и нижней панелей — чтобы кнопки видеоплеера не прятались под ними.
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root || !('ResizeObserver' in window)) return undefined;
+    const set = () => {
+      root.style.setProperty('--viewer-foot', `${footRef.current?.offsetHeight || 0}px`);
+      root.style.setProperty('--viewer-head', `${headRef.current?.offsetHeight || 0}px`);
+    };
+    set();
+    const ro = new ResizeObserver(set);
+    if (footRef.current) ro.observe(footRef.current);
+    if (headRef.current) ro.observe(headRef.current);
+    return () => ro.disconnect();
+  });
   const rootRef = useRef();
   const stageRef = useRef();
   const trackRef = useRef();
@@ -300,7 +327,7 @@ export default function Viewer({ route }) {
 
   return (
     <div ref={rootRef} className={`viewer ${chrome ? '' : 'bare'} ${zoomed ? 'zoomed' : ''}`}>
-      <header className="viewer-top">
+      <header className="viewer-top" ref={headRef}>
         <button className="icon-btn" onClick={nav.back} aria-label="Назад"><Icon name="back" size={26} /></button>
         <span className="viewer-count">{safeIndex + 1} из {ids.length}</span>
         <button className="icon-btn" onClick={() => act.menu(item, { inViewer: true })} aria-label="Ещё"><Icon name="more" size={24} /></button>
@@ -331,7 +358,7 @@ export default function Viewer({ route }) {
         )}
       </div>
 
-      <footer className="viewer-bottom">
+      <footer className="viewer-bottom" ref={footRef}>
         <div className="viewer-tip"><Tip id="viewer-gestures" icon="hand">Двойное касание или щипок — приблизить. Потяните вниз, чтобы закрыть.</Tip></div>
         {item.caption && <p className="viewer-caption">{item.caption}</p>}
         {ids.length > 1 && (
